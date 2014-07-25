@@ -1,0 +1,268 @@
+#!/usr/bin/env node
+'use strict'
+var fs = require('fs');
+var path = require('path');
+var jsmin = require('jsmin2');
+var jsugly = require('uglify-js');
+var colors = require('colors');
+var projConf = require('../package.json');
+
+//colors
+//bold italic underline inverse 
+//yellow cyan white magenta green
+//red grey blue rainbow zebra random
+
+//cmd
+//incre 显示帮助信息
+//incre init 在当前路径下创建".incre"目录，存放临时文件和配置文件(increfile.js)
+//incre build 根据配置文件(increfile.js)生成增量文件，打印增量信息
+//incre upload 上传增量文件
+//
+//build之前需要jsmin，再和线上的文件对比。jsuglify可能会影响增量文件的计算
+//upload过程提供接口供用户自己实现
+//
+var incre = module.exports = require('../index.js');
+
+function initConfig(){
+  incre.fs.mkdir('.incre', './');
+  incre.fs.mkdir('upload', './.incre');
+
+  var file = 'increfile.js';
+  var defaultConfig = fs.createReadStream(path.join(incre.root, 'sample/'+file));
+  var targetConfig = fs.createWriteStream(path.join('./.incre/', file));
+  defaultConfig.pipe(targetConfig, {
+    flags : 'w',
+    encoding : 'utf-8',
+    mode : '755'
+  });
+}
+
+function checkConfig(){
+  var commandDir = path.resolve('./').split(path.sep);
+  var curDir;
+  while(commandDir.length > 1){//从当前目录向上寻找incre配置目录
+    curDir = path.join(commandDir.join(path.sep), '/.incre');
+    if(fs.existsSync(curDir)){
+      return curDir;
+    }
+    commandDir.pop();
+  }
+  return false;
+}
+
+//文件名:文件路径map
+function getFilePathMap(){
+  var filePathMap = {};
+  incre.gear._.each(incre.config.src, function(v, k){
+    var fileInfo = k.split('/');
+    var fileName = fileInfo[fileInfo.length - 1];
+    var filePath = k.replace(fileName, '');
+    filePathMap[fileName] = filePath;
+  });
+  return filePathMap;
+}
+
+function addZero(v){
+  v = v.toString();
+  if(v.length == 1){
+    v = '0' + v;
+  }
+  return v;
+}
+
+function printLogInfo(logInfo){
+  console.log('');
+  console.log('  incre file list:'.green);
+  console.log('  file\t\ttotal\t\tsaving'.cyan);
+  incre.gear._.each(logInfo, function(v, k){
+    if(v.status == 'ok'){
+      console.log(('  ' + k + '\t\t' + v.total + '\t\t' + v.saving).grey);
+    }
+    else if(v.status == 'error'){
+      console.log(('  ' + k + '\t\tfail to generate incre file').red);
+    }
+  });
+  console.log('');
+}
+
+//build process
+function build(){
+  var d = new Date();
+  var ver = d.getFullYear().toString().slice(2) + addZero(d.getMonth() + 1) + addZero(d.getDate());
+  var uploadDir = incre.config.base + '.incre/upload/';
+  var logInfo = incre.gear.listen.add({}, function(logs){
+    if(incre.gear.jsonsize(logs) == incre.gear.jsonsize(incre.config.src)){
+      printLogInfo(logs);
+    }
+  });
+  clear();
+  incre.gear._.each(incre.config.src, function(v, k){
+    var newfile = incre.config.base + k;
+    incre.fs.readFile(newfile).done(function(data){
+      var newcode = jsmin(data).code;//jsmin
+      newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
+      
+      //写全量文件
+      var newfileInfo = newfile.split('/');
+      var newfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + ver + '.js');
+      var tmpfile = uploadDir + newfileName;
+
+      fs.writeFile(tmpfile, newcode, function(err){
+        if(err){
+          console.log(('  Error : write file ' + newfileName + ' failed!').red);
+        }
+        else{
+          console.log('  Info : write file ' + newfileName + ' success.');
+        }
+      });
+
+      //计算增量文件
+      var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
+      var jsKey = k.replace('.js', '');
+      var logObj = {};
+      incre.fs.readFile(cdnfile).done(function(data1){
+        var oldcode = data1;
+
+        var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
+        increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
+        increObj.total = newcode.length;//全量字符数
+        var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
+
+        //写增量文件
+        var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
+        var increfile = uploadDir + increfileName;
+
+        fs.writeFile(increfile, increcode, function(err){
+          if(err){
+            logObj[jsKey] = {
+              status : 'error'
+            };
+            incre.gear.listen.set(logInfo, logObj);
+            console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+          }
+          else{
+            logObj[jsKey] = {
+              status : 'ok',
+              total : increObj.total,
+              saving : increObj.saving
+            };
+            incre.gear.listen.set(logInfo, logObj);
+            console.log('  Info : write incre file ' + increfileName + ' success.');
+          }
+        });
+      }, function(err){
+        console.log(('  Error : ' + err).red);
+        logObj[jsKey] = {
+          status : 'error'
+        }
+        incre.gear.listen.set(logInfo, logObj);
+      });
+    });
+  });
+  console.log('  Info : start building'.green);
+}
+
+//upload process
+function upload(){
+  if(!incre.uploadFun){
+    console.log('  Warning : you do not implement "post" function to communicate with your upload cgi.You can check this link http://github.com/aslinwang/increjs'.yellow);
+    return;
+  }
+  var uploadDir = incre.config.base + '.incre/upload/';
+  console.log('  Info : start uploading'.green);
+  incre.uploadDir(uploadDir, {
+    cdnpath : incre.config.cdnpath,
+    filePathMap : getFilePathMap()
+  }, function(){
+    console.log('  Info : upload done'.green);
+  });
+}
+
+//clear process
+function clear(){
+  var uploadDir = incre.config.base + '.incre/upload/';
+  console.log('  Info : start clearing'.green);
+  incre.fs.clearDirSync(uploadDir, function(file){
+    console.log('  Info : remove ' + file + ' success.');
+  });
+  console.log('  Info : clear done'.green);
+}
+
+incre.commander.option({
+  cmd : '-s, --save',
+  description : 'save config',
+  handler : function(){
+    console.log('save config done');
+  }
+});
+
+incre.commander.option({
+  cmd : '-h, --hide',
+  description : 'hide log',
+  handler : function(){
+    console.log('hide log');
+  }
+});
+
+incre.commander.command({
+  cmd : 'init',
+  description : 'init incre config file',
+  handler : function(){
+    var exist = fs.existsSync('./.incre');
+    if(exist){
+      incre.commander.read(' incre config files was existed, override ? (Y/N)', function(data){
+        if(data.toLowerCase() == 'y'){
+          initConfig();
+          console.log((' Override incre config in ' + path.resolve('./.incre')).cyan);
+        }
+      });
+    }
+    else{
+      initConfig();
+
+      console.log(' Info : Initialized incre config in ' + path.resolve('./.incre'));
+    }
+  }
+});
+
+incre.commander.command({
+  cmd : 'build',
+  description : 'build to generate incre files',
+  handler : function(){
+    build();
+  }
+});
+
+incre.commander.command({
+  cmd : 'upload',
+  description : 'upload incre files to cdn',
+  handler : function(){
+    upload();
+  }
+});
+
+incre.commander.command({
+  cmd : 'clear',
+  description : 'clear incre temp files',
+  handler : function(){
+    clear();
+  }
+});
+
+incre.commander.version(projConf.version);
+
+var config = checkConfig();
+if(process.argv[2] == 'init'){//increjs init
+  incre.commander.run(['init']);
+}
+else{
+  if(config){//有配置
+    incre.config = require(path.join(config, 'increfile.js'));
+    incre.commander.run();
+  }
+  else{//无配置
+    console.log('  Error : Unalbe to find .incre config directory.'.red);
+    console.log('');
+    console.log('  If you\'re seeing this message, type "increjs init" to initialize your project.');
+  }
+}

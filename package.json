@@ -1,0 +1,35 @@
+{
+  "name": "incre.js",
+  "version": "0.0.1",
+  "description": "incre js.",
+  "author": {
+    "name": "aslinwang",
+    "email": "dreamjet.wang@gmail.com",
+    "web": "http://aslinwang.github.io"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "*",
+    "blanket": "*",
+    "cmd-interface": "0.0.5",
+    "jsmin2": "~1.1.7",
+    "uglify-js": "~2.4.15",
+    "colors": "~0.6.2",
+    "request": "~2.38.0",
+    "gearjs": "~0.0.2"
+  },
+  "scripts": {},
+  "config": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aslinwang/increjs.git"
+  },
+  "bin": {
+    "incre": "bin/incre"
+  },
+  "main": "index.js",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aslinwang/incre/issues"
+  }
+}
