@@ -188,22 +188,6 @@ function clear(){
   console.log('  Info : clear done'.green);
 }
 
-incre.commander.option({
-  cmd : '-s, --save',
-  description : 'save config',
-  handler : function(){
-    console.log('save config done');
-  }
-});
-
-incre.commander.option({
-  cmd : '-h, --hide',
-  description : 'hide log',
-  handler : function(){
-    console.log('hide log');
-  }
-});
-
 incre.commander.command({
   cmd : 'init',
   description : 'init incre config file',
