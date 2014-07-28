@@ -165,7 +165,7 @@ function build(){
 //upload process
 function upload(){
   if(!incre.uploadFun){
-    console.log('  Warning : you do not implement "post" function to communicate with your upload cgi.You can check this link http://github.com/aslinwang/increjs'.yellow);
+    console.log('  Warning : you do not implement "post" function to communicate with your upload cgi.You can check this link https://github.com/aslinwang/increjs/issues/1'.yellow);
     return;
   }
   var uploadDir = incre.config.base + '.incre/upload/';

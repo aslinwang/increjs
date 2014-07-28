@@ -19,7 +19,7 @@ Usage
 
 `increjs upload`
 
-命令行执行，将build生成的文件上传至指定的CDN或服务器上。**此功能的与服务器通信部分，需要自己实现。详见：xxx**
+命令行执行，将build生成的文件上传至指定的CDN或服务器上。**此功能的与服务器通信部分，需要自己实现。详见：https://github.com/aslinwang/increjs/issues/1**
 
 `increjs clear`
 
