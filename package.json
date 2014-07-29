@@ -1,6 +1,6 @@
 {
   "name": "incre.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "incre js.",
   "author": {
     "name": "aslinwang",
@@ -25,7 +25,7 @@
     "url": "https://github.com/aslinwang/increjs.git"
   },
   "bin": {
-    "incre": "bin/incre"
+    "increjs": "bin/increjs"
   },
   "main": "index.js",
   "license": "MIT",
