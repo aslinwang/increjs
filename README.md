@@ -31,3 +31,9 @@ Attention
 
 increjs是一个js构建工具，最终生成并上传带版本信息的js文件，在开发过程中，使用seajs插件，seajs-appcache，可以加载符合条件的增量文件。详见[seajs-appcache](http://github.com/aslinwang/seajs-appcache)说明
 
+Change Log
+----------
+29 July 2014
+ * 完成increjs的基本功能，init、build、upload、clear等
+20 August 2014
+ * 支持对js文件的普通build、upload，不生成增量文件

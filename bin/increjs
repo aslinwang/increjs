@@ -13,10 +13,11 @@ var projConf = require('../package.json');
 //red grey blue rainbow zebra random
 
 //cmd
-//incre 显示帮助信息
-//incre init 在当前路径下创建".incre"目录，存放临时文件和配置文件(increfile.js)
-//incre build 根据配置文件(increfile.js)生成增量文件，打印增量信息
-//incre upload 上传增量文件
+//increjs 显示帮助信息
+//increjs init 在当前路径下创建".incre"目录，存放临时文件和配置文件(increfile.js)
+//increjs build 根据配置文件(increfile.js)生成增量文件，打印增量信息
+//increjs upload 上传增量文件
+//increjs compare -f1 -f2 比较文件f1与文件f2生成增量文件
 //
 //build之前需要jsmin，再和线上的文件对比。jsuglify可能会影响增量文件的计算
 //upload过程提供接口供用户自己实现
@@ -85,6 +86,40 @@ function printLogInfo(logInfo){
   console.log('');
 }
 
+//compare
+//工具类，快速计算两个文件的增量部分
+function getincre(newfile, oldfile){
+  var uploadDir = incre.config.base + '.incre/upload/';
+  var newfileInfo = newfile.split('/');
+  var oldfileInfo = oldfile.split('/');
+  var increfileName = oldfileInfo[oldfileInfo.length - 1].replace('.js', '_') + newfileInfo[newfileInfo.length - 1];
+  var increfile = uploadDir + increfileName;
+  incre.fs.readFile(newfile).done(function(data){
+    var newcode = data;
+
+    incre.fs.readFile(oldfile).done(function(data1){
+      var oldcode = data1;
+
+      var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
+      increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
+      increObj.total = newcode.length;//全量字符数
+      var increcode = 'increCallback_' + parseInt( new Date().getTime()) + '=' + JSON.stringify(increObj);
+
+      fs.writeFile(increfile, increcode, function(err){
+        if(err){
+          console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+        }
+        else{
+          console.log('  Info : write incre file ' + increfileName + ' success.');
+        }
+      });
+    }, function(err){
+      console.log(('  Error : ' + err).red);
+    });
+    
+  });
+}
+
 //build process
 function build(){
   var d = new Date();
@@ -116,47 +151,49 @@ function build(){
         }
       });
 
-      //计算增量文件
-      var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
-      var jsKey = k.replace('.js', '');
-      var logObj = {};
-      incre.fs.readFile(cdnfile).done(function(data1){
-        var oldcode = data1;
+      if(v.trim() != ''){//全量版本号存在时
+        //计算增量文件
+        var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
+        var jsKey = k.replace('.js', '');
+        var logObj = {};
+        incre.fs.readFile(cdnfile).done(function(data1){
+          var oldcode = data1;
 
-        var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
-        increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
-        increObj.total = newcode.length;//全量字符数
-        var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
+          var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
+          increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
+          increObj.total = newcode.length;//全量字符数
+          var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
 
-        //写增量文件
-        var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
-        var increfile = uploadDir + increfileName;
+          //写增量文件
+          var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
+          var increfile = uploadDir + increfileName;
 
-        fs.writeFile(increfile, increcode, function(err){
-          if(err){
-            logObj[jsKey] = {
-              status : 'error'
-            };
-            incre.gear.listen.set(logInfo, logObj);
-            console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+          fs.writeFile(increfile, increcode, function(err){
+            if(err){
+              logObj[jsKey] = {
+                status : 'error'
+              };
+              incre.gear.listen.set(logInfo, logObj);
+              console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+            }
+            else{
+              logObj[jsKey] = {
+                status : 'ok',
+                total : increObj.total,
+                saving : increObj.saving
+              };
+              incre.gear.listen.set(logInfo, logObj);
+              console.log('  Info : write incre file ' + increfileName + ' success.');
+            }
+          });
+        }, function(err){
+          console.log(('  Error : ' + err).red);
+          logObj[jsKey] = {
+            status : 'error'
           }
-          else{
-            logObj[jsKey] = {
-              status : 'ok',
-              total : increObj.total,
-              saving : increObj.saving
-            };
-            incre.gear.listen.set(logInfo, logObj);
-            console.log('  Info : write incre file ' + increfileName + ' success.');
-          }
+          incre.gear.listen.set(logInfo, logObj);
         });
-      }, function(err){
-        console.log(('  Error : ' + err).red);
-        logObj[jsKey] = {
-          status : 'error'
-        }
-        incre.gear.listen.set(logInfo, logObj);
-      });
+      }
     });
   });
   console.log('  Info : start building'.green);
@@ -172,6 +209,7 @@ function upload(){
   console.log('  Info : start uploading'.green);
   incre.uploadDir(uploadDir, {
     cdnpath : incre.config.cdnpath,
+    path_prefix : incre.config.path_prefix,
     filePathMap : getFilePathMap()
   }, function(){
     console.log('  Info : upload done'.green);
@@ -230,6 +268,32 @@ incre.commander.command({
   description : 'clear incre temp files',
   handler : function(){
     clear();
+  }
+});
+
+incre.commander.command({
+  cmd : 'compare',
+  description : 'generate incre base two files',
+  //description : '-f1 file1\t -f2 file2',
+  handler : function(parse){
+    if(!parse.f1 && !parse.f2){
+      console.log('  Warning : has no f1 and f2 options! use command "increjs  compare -f1 file1 -f2 file2"'.yellow);
+      return;
+    }
+    else{
+      if(!parse.f1){
+        console.log('  Warning : has no f1 option! use command "increjs  compare -f1 file1 -f2 file2"'.yellow);
+        return;
+      }
+      else if(!parse.f2){
+        console.log('  Warning : has no f2 option! use command "increjs  compare -f1 file1 -f2 file2"'.yellow);
+        return;
+      }
+    }
+    var file1 = parse.f1[0], file2 = parse.f2[0];
+    if(file1 && file2){
+      getincre(file2, file1);
+    }
   }
 });
 
