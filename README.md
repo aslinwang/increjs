@@ -35,5 +35,6 @@ Change Log
 ----------
 29 July 2014
  * 完成increjs的基本功能，init、build、upload、clear等
+
 20 August 2014
  * 支持对js文件的普通build、upload，不生成增量文件
