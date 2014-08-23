@@ -1,6 +1,6 @@
 {
   "name": "incre.js",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "incre js.",
   "author": {
     "name": "aslinwang",
@@ -10,10 +10,11 @@
   "dependencies": {
     "cmd-interface": "0.0.5",
     "jsmin2": "~1.1.7",
+    "clean-css": "~2.2.13",
     "uglify-js": "~2.4.15",
     "colors": "~0.6.2",
     "request": "~2.38.0",
-    "gearjs": "~0.0.3"
+    "gearjs": "~0.0.4"
   },
   "devDependencies": {
     "mocha": "*",

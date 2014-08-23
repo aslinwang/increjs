@@ -1,7 +1,7 @@
 increjs
 ============
 
-A tool could compile js files, generator incre files and upload them.
+一个前端构建自动化工具
 
 Install
 -------
@@ -38,3 +38,8 @@ Change Log
 
 20 August 2014
  * 支持对js文件的普通build、upload，不生成增量文件
+
+23 August 2014
+ * 支持多个js文件merge到一个js文件
+ * 支持构建并上传css文件
+ * 支持构建前端模版特性

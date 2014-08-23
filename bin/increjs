@@ -2,6 +2,7 @@
 'use strict'
 var fs = require('fs');
 var path = require('path');
+var cleancss = require('clean-css');
 var jsmin = require('jsmin2');
 var jsugly = require('uglify-js');
 var colors = require('colors');
@@ -26,7 +27,8 @@ var incre = module.exports = require('../index.js');
 
 function initConfig(){
   incre.fs.mkdir('.incre', './');
-  incre.fs.mkdir('upload', './.incre');
+  incre.fs.mkdir('upload', './.incre');//待上传的文件临时目录
+  incre.fs.mkdir('tmpl', './.incre');//存放模板的目录
 
   var file = 'increfile.js';
   var defaultConfig = fs.createReadStream(path.join(incre.root, 'sample/'+file));
@@ -120,6 +122,120 @@ function getincre(newfile, oldfile){
   });
 }
 
+function merge(){
+  var res = {};
+  var defer = incre.gear.q.defer();
+
+  var keys = incre.gear._.keys(incre.config.merge);
+  function get(){
+    var key = keys.shift();
+    if(!key){
+      defer.resolve(res);
+    }
+    else{
+      var val = incre.config.merge[key];
+      val = incre.gear._.map(val, function(item){
+        return incre.config.base + item;
+      });
+
+      incre.fs.readFiles(val).done(function(datas){
+        res[key] = datas;
+        get();
+      }, function(err){
+        defer.reject(err);
+      });  
+    }
+  }
+
+  get();
+
+  return defer.promise;
+}
+
+var Tmplate = (function(){
+  var tmplDir = '';
+
+  /**
+   * 读取incre.config.template[key]中的模板，然后build，最后写入文件中
+   * @param  {array} tmplsKeys 模板对象中的key
+   * @param  {object} tmpls     模板对象
+   * @param  {string} tmplRoot  模板源文件目录
+   * @param  {string} tmplKey       模板项目名
+   * @return {[type]}           [description]
+   */
+  function action(tmplsKeys, tmpls, tmplRoot, tmplKey){
+     var defer = incre.gear.q.defer();
+
+     function exec(){
+      var key = tmplsKeys.shift();
+      if(!key){
+        defer.resolve(true);
+      }
+      else{
+        var val = tmplRoot + tmpls[key];
+        incre.fs.readFile(val).done(function(data){
+          var code = ['define("tmpl/"', key, '","', incre.htmlmin(data) , '");'].join('');
+          var file = tmplDir + tmplKey + '/' + key + '.js';
+          incre.fs.writeFile(file, code, function(err){
+            if(err){
+              console.log(('  Error : write incre file ' + file + 'failed!').red);
+            }
+            else{
+              console.log('  Info : write incre file ' + file + ' success.');
+            }
+          }, './');
+
+          exec();
+        }, function(err){
+          defer.reject(err);
+        });
+      }
+     }
+
+     exec();
+
+     return defer.promise;
+  }
+
+  function build(){
+    var root = incre.config.base + incre.config.template.root;
+    delete incre.config.template.root;
+
+    var keys = incre.gear._.keys(incre.config.template);
+
+    tmplDir = incre.config.base + '.incre/tmpl/';
+
+    function exec(){
+      var key = keys.shift();
+      if(!key){
+        return;
+      }
+      else{
+        var tmplRoot = root + key + '/';
+        var tmpls = incre.config.template[key];
+        var tmplsKeys = incre.gear._.keys(tmpls);
+
+        action(tmplsKeys, tmpls, tmplRoot, key).done(function(res){
+          if(res){
+            exec();
+          }
+        });
+      }
+    }
+
+    exec();
+  }
+
+  function isenable(){
+    return incre.config.template && incre.config.template.root;
+  }
+
+  return {
+    build : build,
+    isenable : isenable
+  };
+}());
+
 //build process
 function build(){
   var d = new Date();
@@ -131,72 +247,99 @@ function build(){
     }
   });
   clear();
-  incre.gear._.each(incre.config.src, function(v, k){
-    var newfile = incre.config.base + k;
-    incre.fs.readFile(newfile).done(function(data){
-      var newcode = jsmin(data).code;//jsmin
-      newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
-      
-      //写全量文件
-      var newfileInfo = newfile.split('/');
-      var newfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + ver + '.js');
-      var tmpfile = uploadDir + newfileName;
 
-      fs.writeFile(tmpfile, newcode, function(err){
-        if(err){
-          console.log(('  Error : write file ' + newfileName + ' failed!').red);
-        }
-        else{
-          console.log('  Info : write file ' + newfileName + ' success.');
-        }
-      });
+  merge().done(function(mergeCodes){
+    //build js/css
+    incre.gear._.each(incre.config.src, function(v, k){//@todo 这里each(同步)和readFile(异步)之间可能有问题
+      var newfile = incre.config.base + k;
+      (function(newfile, v, k){
+        incre.fs.readFile(newfile, true).done(function(data){
+          var newcode = '';
+          if(data){//区分js和css
+            if(newfile.indexOf('.js') != -1){
+              newcode = jsmin(data).code;//jsmin
+              newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
+            }
+            else if(newfile.indexOf('.css') != -1){
+              newcode = new cleancss().minify(data);
+            }
+          }
+          else{
+            if(mergeCodes[k] && mergeCodes[k].length > 0){//合并文件
+              newcode = mergeCodes[k].join('\n');
+              newcode = jsmin(newcode).code;//jsmin
+              newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
+            }
+          }
+          
+          //写全量文件
+          var newfileInfo = newfile.split('/');
+          var newfileName = (v == '-' ? newfileInfo[newfileInfo.length - 1] : newfileInfo[newfileInfo.length - 1].replace(/(\.(js|css))$/, '_' + ver + '$1'));
+          var tmpfile = uploadDir + newfileName;
 
-      if(v.trim() != ''){//全量版本号存在时
-        //计算增量文件
-        var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
-        var jsKey = k.replace('.js', '');
-        var logObj = {};
-        incre.fs.readFile(cdnfile).done(function(data1){
-          var oldcode = data1;
-
-          var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
-          increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
-          increObj.total = newcode.length;//全量字符数
-          var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
-
-          //写增量文件
-          var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
-          var increfile = uploadDir + increfileName;
-
-          fs.writeFile(increfile, increcode, function(err){
+          fs.writeFile(tmpfile, newcode, function(err){
             if(err){
-              logObj[jsKey] = {
-                status : 'error'
-              };
-              incre.gear.listen.set(logInfo, logObj);
-              console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+              console.log(('  Error : write file ' + newfileName + ' failed!').red);
             }
             else{
-              logObj[jsKey] = {
-                status : 'ok',
-                total : increObj.total,
-                saving : increObj.saving
-              };
-              incre.gear.listen.set(logInfo, logObj);
-              console.log('  Info : write incre file ' + increfileName + ' success.');
+              console.log('  Info : write file ' + newfileName + ' success.');
             }
           });
-        }, function(err){
-          console.log(('  Error : ' + err).red);
-          logObj[jsKey] = {
-            status : 'error'
+
+          if(v.trim() != '' && v.trim() != '-'){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
+            //计算增量文件
+            var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
+            var jsKey = k.replace('.js', '');
+            var logObj = {};
+            incre.fs.readFile(cdnfile).done(function(data1){
+              var oldcode = data1;
+
+              var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
+              increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
+              increObj.total = newcode.length;//全量字符数
+              var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
+
+              //写增量文件
+              var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
+              var increfile = uploadDir + increfileName;
+
+              fs.writeFile(increfile, increcode, function(err){
+                if(err){
+                  logObj[jsKey] = {
+                    status : 'error'
+                  };
+                  incre.gear.listen.set(logInfo, logObj);
+                  console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+                }
+                else{
+                  logObj[jsKey] = {
+                    status : 'ok',
+                    total : increObj.total,
+                    saving : increObj.saving
+                  };
+                  incre.gear.listen.set(logInfo, logObj);
+                  console.log('  Info : write incre file ' + increfileName + ' success.');
+                }
+              });
+            }, function(err){
+              console.log(('  Error : ' + err).red);
+              logObj[jsKey] = {
+                status : 'error'
+              }
+              incre.gear.listen.set(logInfo, logObj);
+            });
           }
-          incre.gear.listen.set(logInfo, logObj);
         });
-      }
+      }(newfile, v, k));
     });
+
+    //build template
+    if(Tmplate.isenable()){
+      Tmplate.build();
+    }
   });
-  console.log('  Info : start building'.green);
+
+  console.log('  Info : start building js, css and template'.green);
 }
 
 //upload process
@@ -209,7 +352,10 @@ function upload(){
   console.log('  Info : start uploading'.green);
   incre.uploadDir(uploadDir, {
     cdnpath : incre.config.cdnpath,
+    cdncsspath : incre.config.cdncsspath,
     path_prefix : incre.config.path_prefix,
+    csspath_prefix : incre.config.csspath_prefix,
+    pathmap : incre.config.pathmap,
     filePathMap : getFilePathMap()
   }, function(){
     console.log('  Info : upload done'.green);
