@@ -22,13 +22,14 @@ var projConf = require('../package.json');
 //
 //build之前需要jsmin，再和线上的文件对比。jsuglify可能会影响增量文件的计算
 //upload过程提供接口供用户自己实现
-//
+//build模版时，需要处理模版依赖的样式文件（为单独文件，不写在模板html中）
 var incre = module.exports = require('../index.js');
 
 function initConfig(){
-  incre.fs.mkdir('.incre', './');
-  incre.fs.mkdir('upload', './.incre');//待上传的文件临时目录
-  incre.fs.mkdir('tmpl', './.incre');//存放模板的目录
+  incre.fs.mkdir('.incre', incre.config.base);
+  incre.fs.mkdir('upload', incre.config.base + '.incre');//待上传的文件临时目录
+  incre.fs.mkdir('tmpl', incre.config.base + '.incre');//存放模板的目录
+  incre.fs.mkdir('md2html', incre.config.base + '.incre');//markdown文件转成html文件之后，存放的目录
 
   var file = 'increfile.js';
   var defaultConfig = fs.createReadStream(path.join(incre.root, 'sample/'+file));
@@ -152,7 +153,7 @@ function merge(){
   return defer.promise;
 }
 
-var Tmplate = (function(){
+var Template = (function(){
   var tmplDir = '';
 
   /**
@@ -174,8 +175,15 @@ var Tmplate = (function(){
       else{
         var val = tmplRoot + tmpls[key];
         incre.fs.readFile(val).done(function(data){
-          var code = ['define("tmpl/"', key, '","', incre.htmlmin(data) , '");'].join('');
-          var file = tmplDir + tmplKey + '/' + key + '.js';
+          var code = '', file = '';
+          if(val.indexOf('.css') != -1){//css文件
+            code = ["define('css/", key, "','", new cleancss().minify(data) , "');"].join('');
+            file = tmplDir + tmplKey + '/' + key + '.css.js';
+          }
+          else{//html文件
+            code = ["define('tmpl/", key, "','", incre.htmlmin(data) , "');"].join('');
+            file = tmplDir + tmplKey + '/' + key + '.js';
+          }
           incre.fs.writeFile(file, code, function(err){
             if(err){
               console.log(('  Error : write incre file ' + file + 'failed!').red);
@@ -183,7 +191,7 @@ var Tmplate = (function(){
             else{
               console.log('  Info : write incre file ' + file + ' success.');
             }
-          }, './');
+          }, incre.config.base);
 
           exec();
         }, function(err){
@@ -334,8 +342,8 @@ function build(){
     });
 
     //build template
-    if(Tmplate.isenable()){
-      Tmplate.build();
+    if(Template.isenable()){
+      Template.build();
     }
   });
 
@@ -360,6 +368,45 @@ function upload(){
   }, function(){
     console.log('  Info : upload done'.green);
   });
+}
+
+function markdown(){
+  var pre = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><link href="http://mat1.gtimg.com/www/mb/css/lib/markdown_131018.css" media="all" rel="stylesheet" type="text/css" /></head><body><div id="content-container" class="markdown-body"></div><textarea id="content-source" style="display:none">',
+      end = '</textarea> <script src="http://mat1.gtimg.com/www/mb/js/lib/marked_131018.js"></script> <script> marked.setOptions({breaks : true,highlight : function(code, lang) { return lang ? hljs.highlight(lang, code).value : hljs.highlightAuto(code).value; }});document.getElementById(\'content-container\').innerHTML = marked(document.getElementById(\'content-source\').value);</script> </body> </html>',
+      defer = incre.gear.q.defer();
+
+  var mds = incre.config.markdown;
+  var htmlRoot = incre.config.base + '.incre/md2html/';
+
+  function exec(){
+    var md = mds.shift();
+    if(!md){
+      defer.resolve(true);
+    }
+    else{
+      var val = incre.config.base + md;
+      incre.fs.readFile(val).done(function(data){
+        data = pre + data + end;
+        var file = htmlRoot + md + '.html';
+        incre.fs.writeFile(file, data, function(err){
+          if(err){
+            console.log(('  Error : write incre file ' + file + 'failed!').red);
+          }
+          else{
+            console.log('  Info : write incre file ' + file + ' success.');
+          }
+        }, incre.config.base);
+
+        exec();
+      }, function(err){
+        defer.reject(err);
+      });
+    }
+  }
+
+  exec();
+
+  return defer.promise;
 }
 
 //clear process
@@ -406,6 +453,14 @@ incre.commander.command({
   description : 'upload incre files to cdn',
   handler : function(){
     upload();
+  }
+});
+
+incre.commander.command({
+  cmd : 'markdown',
+  description : 'turn markdown file to html file',
+  handler : function(){
+    markdown();
   }
 });
 

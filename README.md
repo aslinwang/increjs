@@ -43,3 +43,7 @@ Change Log
  * 支持多个js文件merge到一个js文件
  * 支持构建并上传css文件
  * 支持构建前端模版特性
+
+25 August 2014
+ * 构建模板时，还可以构建与模板相关的css文件
+ * 支持转化markdown文件为html文件，便于浏览
