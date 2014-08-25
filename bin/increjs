@@ -26,10 +26,11 @@ var projConf = require('../package.json');
 var incre = module.exports = require('../index.js');
 
 function initConfig(){
-  incre.fs.mkdir('.incre', incre.config.base);
-  incre.fs.mkdir('upload', incre.config.base + '.incre');//待上传的文件临时目录
-  incre.fs.mkdir('tmpl', incre.config.base + '.incre');//存放模板的目录
-  incre.fs.mkdir('md2html', incre.config.base + '.incre');//markdown文件转成html文件之后，存放的目录
+  var base = './';
+  incre.fs.mkdir('.incre', base);
+  incre.fs.mkdir('upload', base + '.incre');//待上传的文件临时目录
+  incre.fs.mkdir('tmpl', base + '.incre');//存放模板的目录
+  incre.fs.mkdir('md2html', base + '.incre');//markdown文件转成html文件之后，存放的目录
 
   var file = 'increfile.js';
   var defaultConfig = fs.createReadStream(path.join(incre.root, 'sample/'+file));
