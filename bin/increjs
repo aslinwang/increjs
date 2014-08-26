@@ -372,7 +372,7 @@ function upload(){
 }
 
 function markdown(){
-  var pre = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><link href="http://mat1.gtimg.com/www/mb/css/lib/markdown_140826.css" media="all" rel="stylesheet" type="text/css" /></head><body><div id="content-container" class="markdown-body"></div><textarea id="content-source" style="display:none">',
+  var pre = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><link href="http://mat1.gtimg.com/www/mb/css/lib/markdown_140826a.css" media="all" rel="stylesheet" type="text/css" /></head><body><div id="content-container" class="markdown-body"></div><textarea id="content-source" style="display:none">',
       end = '</textarea> <script src="http://mat1.gtimg.com/www/mb/js/lib/marked_131018.js"></script> <script> marked.setOptions({breaks : true,highlight : function(code, lang) { return lang ? hljs.highlight(lang, code).value : hljs.highlightAuto(code).value; }});document.getElementById(\'content-container\').innerHTML = marked(document.getElementById(\'content-source\').value);</script> </body> </html>',
       defer = incre.gear.q.defer();
 
