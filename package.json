@@ -1,6 +1,6 @@
 ﻿{
-  "name": "incre.js",
-  "version": "1.0.4",
+  "name": "increjs",
+  "version": "1.0.5",
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
@@ -27,7 +27,7 @@
     "url": "https://github.com/aslinwang/increjs.git"
   },
   "bin": {
-    "increjs": "bin/increjs"
+    "incre": "bin/increjs"
   },
   "main": "index.js",
   "license": "MIT",
