@@ -47,3 +47,7 @@ Change Log
 25 August 2014
  * 构建模板时，还可以构建与模板相关的css文件
  * 支持转化markdown文件为html文件，便于浏览
+
+26 August 2014
+ * 在未执行初始化操作时，也能使用`increjs -v`和`increjs`命令
+ * 优化markdown文件html化之后的展现样式
