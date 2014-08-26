@@ -1,6 +1,6 @@
 ﻿{
   "name": "increjs",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
@@ -32,6 +32,6 @@
   "main": "index.js",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aslinwang/incre/issues"
+    "url": "https://github.com/aslinwang/increjs/issues"
   }
 }

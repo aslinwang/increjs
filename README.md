@@ -9,19 +9,19 @@ Install
 
 Usage
 -----
-`increjs init`
+`incre init`
 
 命令行进入到工作目录，如:jsdev/，然后执行此命令，将会在此目录下生成`.incre`目录，里面存放配置信息和一些临时文件
 
-`increjs build`
+`incre build`
 
 命令行执行，将会根据配置文件`.incre/increfile.js`进行编译，生成相应的全量文件和增量文件
 
-`increjs upload`
+`incre upload`
 
 命令行执行，将build生成的文件上传至指定的CDN或服务器上。**此功能的与服务器通信部分，需要自己实现。详见：https://github.com/aslinwang/increjs/issues/1**
 
-`increjs clear`
+`incre clear`
 
 命令行执行，清除`.incre`目录下的临时文件
 
@@ -49,5 +49,5 @@ Change Log
  * 支持转化markdown文件为html文件，便于浏览
 
 26 August 2014
- * 在未执行初始化操作时，也能使用`increjs -v`和`increjs`命令
+ * 在未执行初始化操作时，也能使用`incre -v`和`incre`命令
  * 优化markdown文件html化之后的展现样式

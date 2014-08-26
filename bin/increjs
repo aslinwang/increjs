@@ -14,11 +14,11 @@ var projConf = require('../package.json');
 //red grey blue rainbow zebra random
 
 //cmd
-//increjs 显示帮助信息
-//increjs init 在当前路径下创建".incre"目录，存放临时文件和配置文件(increfile.js)
-//increjs build 根据配置文件(increfile.js)生成增量文件，打印增量信息
-//increjs upload 上传增量文件
-//increjs compare -f1 -f2 比较文件f1与文件f2生成增量文件
+//incre 显示帮助信息
+//incre init 在当前路径下创建".incre"目录，存放临时文件和配置文件(increfile.js)
+//incre build 根据配置文件(increfile.js)生成增量文件，打印增量信息
+//incre upload 上传增量文件
+//incre compare -f1 -f2 比较文件f1与文件f2生成增量文件
 //
 //build之前需要jsmin，再和线上的文件对比。jsuglify可能会影响增量文件的计算
 //upload过程提供接口供用户自己实现
@@ -479,16 +479,16 @@ incre.commander.command({
   //description : '-f1 file1\t -f2 file2',
   handler : function(parse){
     if(!parse.f1 && !parse.f2){
-      console.log('  Warning : has no f1 and f2 options! use command "increjs  compare -f1 file1 -f2 file2"'.yellow);
+      console.log('  Warning : has no f1 and f2 options! use command "incre  compare -f1 file1 -f2 file2"'.yellow);
       return;
     }
     else{
       if(!parse.f1){
-        console.log('  Warning : has no f1 option! use command "increjs  compare -f1 file1 -f2 file2"'.yellow);
+        console.log('  Warning : has no f1 option! use command "incre  compare -f1 file1 -f2 file2"'.yellow);
         return;
       }
       else if(!parse.f2){
-        console.log('  Warning : has no f2 option! use command "increjs  compare -f1 file1 -f2 file2"'.yellow);
+        console.log('  Warning : has no f2 option! use command "incre  compare -f1 file1 -f2 file2"'.yellow);
         return;
       }
     }
@@ -502,13 +502,13 @@ incre.commander.command({
 incre.commander.version(projConf.version);
 
 var config = checkConfig();
-if(!process.argv[2]){//increjs help
+if(!process.argv[2]){//incre help
   incre.commander.run(['-h']);
 }
-else if(process.argv[2] == '-v'){//increjs version
+else if(process.argv[2] == '-v'){//incre version
   incre.commander.run(['-v']);
 }
-else if(process.argv[2] == 'init'){//increjs init
+else if(process.argv[2] == 'init'){//incre init
   incre.commander.run(['init']);
 }
 else{
@@ -519,6 +519,6 @@ else{
   else{//无配置
     console.log('  Error : Unalbe to find .incre config directory.'.red);
     console.log('');
-    console.log('  If you\'re seeing this message, type "increjs init" to initialize your project.');
+    console.log('  If you\'re seeing this message, type "incre init" to initialize your project.');
   }
 }
