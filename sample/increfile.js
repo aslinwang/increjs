@@ -29,6 +29,21 @@ module.exports = {
     //     'Lottery_QQ' : 'Lottery_QQ.html'//模版名：模板文件名。js usage: require('tmpl/Lottery_QQ')
     // }
   },
+  html : {//build html 专为重构工作设计
+    // 模板语法：
+    // <include>inc/header.html</include> <!--引入页面片-->
+    // <div>{title}</div><!--前端变量，在increfile.js中声明-->
+    // <div>{$out.title}</div><!--后端变量，后端模板解析时解析-->
+    
+    // 'root' : 'mobi/html/',//html根目录，存放html片段文件，生成文件在mobi/html/dist目录下
+    // 'mergetest.htm' : {//key为要构建的文件名，value为文件中需要的模板变量
+    //   'inc/header.html' : {
+    //     'title' : '腾讯汽车触屏版',
+    //     'keywords' : '汽车，腾讯汽车，手机，汽车大全，车型大全，汽车报价，汽车图片、汽车评测、汽车资讯，汽车新闻，评测',
+    //     'description' : '腾讯汽车触屏版为您提供厂商名称车系名称系列车型报价，参数配置、图片,经销商、试驾、降价、论坛等信息。'
+    //   }
+    // }
+  },
   pathmap : {//路径映射 local <-> cdn
     // 'mobi/css/' : 'mobi/'//本地文件(local:\\mobi\css\test.css) <-> cdn文件(cdn:/mobi/test.css)
   },

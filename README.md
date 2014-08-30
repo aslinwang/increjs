@@ -51,3 +51,7 @@ Change Log
 26 August 2014
  * 在未执行初始化操作时，也能使用`incre -v`和`incre`命令
  * 优化markdown文件html化之后的展现样式
+
+30 August 2014
+ * 提供sample/demo目录，便于理解increjs的使用
+ * 构建html功能，专为页面重构工作开发。支持公共页面片提取，页面片模板变量声明等

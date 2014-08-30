@@ -1,0 +1,32 @@
+<!--
+@name 抽奖
+@stylesheet:test.css
+@vars
+curIdx:选择框停留位置(默认为0)
+data:数据源
+    @data:[
+        {
+            pic : 'http://t2.qpic.cn/mblogpic/5748a35f596a5da4e7f4/460',
+            word : 'iphone 5s 16G'
+        },
+        {
+            pic : 'http://t1.qpic.cn/mblogpic/7633083bd81a81de84c6/460',
+            word : '100Q币'
+        }
+    ]
+-->
+
+<%
+if(typeof curIdx == "undefined"){
+    curIdx = 0;
+}
+%>
+
+<ul class="cj-list lottery">
+    <% for(var i = 0 ; i < data.length; i++){ %>
+        <li class="cj-block <% if(i == curIdx){ %>active<% } %>">
+            <span class="pic"><img src="<%=data[i].pic%>" style=""></span>
+            <span class="text-name"><%=data[i].word%></span>
+        </li>
+    <% } %>
+</ul>

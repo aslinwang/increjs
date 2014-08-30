@@ -1,0 +1,1 @@
+define('tmpl/Lottery','<%if(typeof curIdx == "undefined"){    curIdx = 0;}%><ul class="cj-list lottery"><% for(var i = 0 ; i < data.length; i++){ %><li class="cj-block <% if(i == curIdx){ %>active<% } %>"><span class="pic"><img src="<%=data[i].pic%>" style=""></span><span class="text-name"><%=data[i].word%></span></li><% } %></ul>');
