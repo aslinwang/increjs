@@ -380,7 +380,7 @@ var Html = (function(){
   //从代码中获取页面片地址
   function getFrags(code, fragVars){
     var codes = {};
-    var frags = code.match(/<include>([a-zA-Z0-9\/\.]*)<\/include>/g) || [];
+    var frags = code.match(/<include>([a-zA-Z0-9_\/\.]*)<\/include>/g) || [];
     var defer = incre.gear.q.defer();
 
     frags = incre.gear._.map(frags, function(frag){
