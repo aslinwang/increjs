@@ -36,22 +36,25 @@ Change Log
 29 July 2014
  * 完成increjs的基本功能，init、build、upload、clear等
 
-20 August 2014
+20 Aug. 2014
  * 支持对js文件的普通build、upload，不生成增量文件
 
-23 August 2014
+23 Aug. 2014
  * 支持多个js文件merge到一个js文件
  * 支持构建并上传css文件
  * 支持构建前端模版特性
 
-25 August 2014
+25 Aug. 2014
  * 构建模板时，还可以构建与模板相关的css文件
  * 支持转化markdown文件为html文件，便于浏览
 
-26 August 2014
+26 Aug. 2014
  * 在未执行初始化操作时，也能使用`incre -v`和`incre`命令
  * 优化markdown文件html化之后的展现样式
 
-30 August 2014
+30 Aug. 2014
  * 提供sample/demo目录，便于理解increjs的使用
  * 构建html功能，专为页面重构工作开发。支持公共页面片提取，页面片模板变量声明等
+
+3 Sept. 2014
+ * `incre html`去BOM

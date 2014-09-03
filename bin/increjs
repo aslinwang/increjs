@@ -6,6 +6,7 @@ var cleancss = require('clean-css');
 var jsmin = require('jsmin2');
 var jsugly = require('uglify-js');
 var colors = require('colors');
+var stripBom = require('strip-bom');
 var projConf = require('../package.json');
 
 //colors
@@ -450,6 +451,7 @@ var Html = (function(){
         action(htmlPath,fragVars).done(function(res){
           if(res){
             var file = dist + key;
+            res = stripBom(res);//remove bom
             incre.fs.writeFile(file, res, function(err){
               if(err){
                 console.log(('  Error : write incre file ' + file + 'failed!').red);
