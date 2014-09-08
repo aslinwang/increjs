@@ -17,9 +17,9 @@ Usage
 
 命令行执行，将会根据配置文件`.incre/increfile.js`进行编译，生成相应的全量文件和增量文件
 
-`incre html`
+`incre html`，`incre html -w`
 
-命令行执行，构建html根目录下的文件。能够解析`<include></include>`语法，能解析简单的页面片变量。方便提取html页面中的公用部分
+命令行执行，构建html根目录下的文件。能够解析`<include></include>`语法，能解析简单的页面片变量。方便提取html页面中的公用部分。带上参数`-w`之后，可以监听html根目录下文件的改动，从而进行自动构建
 
 `incre upload`
 
