@@ -58,3 +58,7 @@ Change Log
 
 3 Sept. 2014
  * `incre html`去BOM
+
+8 Sept. 2014
+ * `incre html -w`监控html根目录下文件改动，自动进行build操作
+ * `incre html`去BOM, fix bug
