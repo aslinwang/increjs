@@ -17,9 +17,17 @@ Usage
 
 命令行执行，将会根据配置文件`.incre/increfile.js`进行编译，生成相应的全量文件和增量文件
 
+`incre html`
+
+命令行执行，构建html根目录下的文件。能够解析`<include></include>`语法，能解析简单的页面片变量。方便提取html页面中的公用部分
+
 `incre upload`
 
 命令行执行，将build生成的文件上传至指定的CDN或服务器上。**此功能的与服务器通信部分，需要自己实现。详见：https://github.com/aslinwang/increjs/issues/1**
+
+`incre markdown`
+
+命令行执行，根据配置文件，可以将md文件转为html文件，以方便阅读
 
 `incre clear`
 
