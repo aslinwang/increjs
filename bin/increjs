@@ -8,6 +8,7 @@ var jsugly = require('uglify-js');
 var colors = require('colors');
 //var stripBom = require('strip-bom');
 var chokidar = require('chokidar');
+var iconv = require('iconv-lite');
 var projConf = require('../package.json');
 
 //colors
@@ -366,10 +367,26 @@ var Html = (function(){
   // <div>{$out.title}</div><!--后端变量，后端模板解析时解析-->
   // 
   
-  var root, dist;
+  var root, dist, charset;
 
   function isenable(){
     return !!incre.config.html;
+  }
+
+  function removeBom(data, fun){
+    var res = data;
+    var buff = new Buffer(data, 'utf-8');
+    if (buff[0].toString(16).toLowerCase() == "ef" && buff[1].toString(16).toLowerCase() == "bb" && buff[2].toString(16).toLowerCase() == "bf") {
+      //EF BB BF 239 187 191
+
+      buff = buff.slice(3);
+      res = buff.toString('utf-8');
+
+      if(fun){
+        fun();
+      }
+    }
+    return res;
   }
 
   //用vars填充code中的变量
@@ -404,16 +421,9 @@ var Html = (function(){
         //替换模板变量
         datas[i] = fillVars(datas[i], fragVars[frags[i]]);
 
-        var buff = new Buffer(datas[i], 'utf-8');
-        if (buff[0].toString(16).toLowerCase() == "ef" && buff[1].toString(16).toLowerCase() == "bb" && buff[2].toString(16).toLowerCase() == "bf") {
-          //EF BB BF 239 187 191
-          console.log(('  Warning : \'' + frags[i] + '\' has bom and be removed automatically!').yellow);
-
-          buff = buff.slice(3);
-          datas[i] = buff.toString('utf-8');
-        }
-
-        codes[frags[i]] = datas[i];
+        codes[frags[i]] = removeBom(datas[i], function(){
+          console.log(('  Warning : \'' + frags[i] + '\' has bom and be removed automatically!').yellow);          
+        });
       }
 
       defer.resolve(codes);
@@ -451,8 +461,10 @@ var Html = (function(){
 
     root = root || incre.config.base + (incre.config.html.root || '');
     dist = root + '/dist/';
+    charset = incre.config.html.charset || 'utf-8';
     if(incre.config.html.root){
       delete incre.config.html.root;
+      delete incre.config.html.charset;
     }
 
     var keys = incre.gear._.keys(incre.config.html);
@@ -469,7 +481,11 @@ var Html = (function(){
         action(htmlPath,fragVars).done(function(res){
           if(res){
             var file = dist + key;
-            //res = stripBom(res);//remove bom
+            res = removeBom(res);//remove bom
+            if(charset != 'utf-8'){
+              //res = iconv.decode(res, 'utf-8');
+              res = iconv.encode(res, charset);
+            }
             incre.fs.writeFile(file, res, function(err){
               if(err){
                 console.log(('  Error : write incre file ' + file + 'failed!').red);

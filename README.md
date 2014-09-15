@@ -73,3 +73,4 @@ Change Log
 
 15 Sept. 2014
  * 增加retina_image配置，将css文件中含有的"main@2x.png"转为"main-2x.png"，以解决部分CMS不支持上传文件名带有@字符的文件的问题
+ * 支持构建除utf-8以外编码（如gbk）的html，修复去BOM的bug

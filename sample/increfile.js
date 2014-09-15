@@ -5,6 +5,7 @@ module.exports = {
   cdncsspath : 'http://mat1.gtimg.com/auto/css/',
   path_prefix : 'js/',//腾讯CMS专用
   csspath_prefix : 'css/',//腾讯CMS专用
+  retina_image : false,//腾讯CMS专用(将autoRetina的图片文件名'@2x'改为'-2x')
   merge : {//合并js
     // 'mobi/core.js' : [
     //     'lib/zepto/zepto-1.1.4.min.js',
@@ -36,6 +37,7 @@ module.exports = {
     // <div>{$out.title}</div><!--后端变量，后端模板解析时解析-->
     
     // 'root' : 'mobi/html/',//html根目录，存放html片段文件，生成文件在mobi/html/dist目录下
+    // 'charset' : 'gbk',//html编码
     // 'mergetest.htm' : {//key为要构建的文件名，value为文件中需要的模板变量
     //   'inc/header.html' : {
     //     'title' : '腾讯汽车触屏版',
