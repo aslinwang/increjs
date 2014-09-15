@@ -70,3 +70,6 @@ Change Log
 8 Sept. 2014
  * `incre html -w`监控html根目录下文件改动，自动进行build操作
  * `incre html`去BOM, fix bug
+
+15 Sept. 2014
+ * 增加retina_image配置，将css文件中含有的"main@2x.png"转为"main-2x.png"，以解决部分CMS不支持上传文件名带有@字符的文件的问题

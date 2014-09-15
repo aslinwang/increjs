@@ -273,6 +273,12 @@ function build(){
             }
             else if(newfile.indexOf('.css') != -1){
               newcode = new cleancss().minify(data);
+              if(incre.config.retina_image){
+                newcode = newcode.replace(/@2x\.png/g, '-2x.png');//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
+                if(newcode.indexOf('-2x.png') != -1){
+                  console.log(('  Warning : file ' + newfile + ' has retina images! Turn their names to "*-2x.png"!').yellow);
+                }
+              }
             }
           }
           else{
