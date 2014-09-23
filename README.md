@@ -21,9 +21,17 @@ Usage
 
 命令行执行，构建html根目录下的文件。能够解析`<include></include>`语法，能解析简单的页面片变量。方便提取html页面中的公用部分。带上参数`-w`之后，可以监听html根目录下文件的改动，从而进行自动构建
 
-`incre upload`
+`incre upload -l`
 
-命令行执行，将build生成的文件上传至指定的CDN或服务器上。**此功能的与服务器通信部分，需要自己实现。详见：https://github.com/aslinwang/increjs/issues/1**
+命令行执行，获取将要上传的文件列表
+
+`incre upload 1,2,3`
+
+命令行执行，上传文件列表中第1,2,3个文件，命令中","为半角逗号
+此命令将build生成的文件上传至指定的CDN或服务器上。**此功能的与服务器通信部分，需要自己实现。详见：https://github.com/aslinwang/increjs/issues/1**
+
+`incre upload 0`
+命令行执行，上传目录下所有文件
 
 `incre markdown`
 
@@ -74,3 +82,7 @@ Change Log
 15 Sept. 2014
  * 增加retina_image配置，将css文件中含有的"main@2x.png"转为"main-2x.png"，以解决部分CMS不支持上传文件名带有@字符的文件的问题
  * 支持构建除utf-8以外编码（如gbk）的html，修复去BOM的bug
+
+22 Sept. 2014
+ * 增加`jsugly`配置。例如可以配置不被jsugly mangle掉的字符串
+ * 增加`incre upload -l`, `incre upload 1,2`, `incre upload 0`

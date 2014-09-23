@@ -270,7 +270,7 @@ function build(){
           if(data){//区分js和css
             if(newfile.indexOf('.js') != -1){
               newcode = jsmin(data).code;//jsmin
-              newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
+              newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
             }
             else if(newfile.indexOf('.css') != -1){
               newcode = new cleancss().minify(data);
@@ -461,7 +461,7 @@ var Html = (function(){
 
     root = root || incre.config.base + (incre.config.html.root || '');
     dist = root + '/dist/';
-    charset = incre.config.html.charset || 'utf-8';
+    charset = charset || incre.config.html.charset || 'utf-8';
     if(incre.config.html.root){
       delete incre.config.html.root;
       delete incre.config.html.charset;
@@ -510,23 +510,28 @@ var Html = (function(){
 }());
 
 //upload process
-function upload(){
+function upload(opt){
   if(!incre.uploadFun){
     console.log('  Warning : you do not implement "post" function to communicate with your upload cgi.You can check this link https://github.com/aslinwang/increjs/issues/1'.yellow);
     return;
   }
   var uploadDir = incre.config.base + '.incre/upload/';
-  console.log('  Info : start uploading'.green);
-  incre.uploadDir(uploadDir, {
-    cdnpath : incre.config.cdnpath,
-    cdncsspath : incre.config.cdncsspath,
-    path_prefix : incre.config.path_prefix,
-    csspath_prefix : incre.config.csspath_prefix,
-    pathmap : incre.config.pathmap,
-    filePathMap : getFilePathMap()
-  }, function(){
-    console.log('  Info : upload done'.green);
-  });
+  if(opt == -1){//查看上传列表
+    incre.listDir(uploadDir);
+  }
+  else{
+    console.log('  Info : start uploading'.green);
+    incre.uploadDir(uploadDir, opt.split(','), {
+      cdnpath : incre.config.cdnpath,
+      cdncsspath : incre.config.cdncsspath,
+      path_prefix : incre.config.path_prefix,
+      csspath_prefix : incre.config.csspath_prefix,
+      pathmap : incre.config.pathmap,
+      filePathMap : getFilePathMap()
+    }, function(){
+      console.log('  Info : upload done'.green);
+    });
+  }
 }
 
 function markdown(){
@@ -629,13 +634,25 @@ incre.commander.command({
   cmd : 'upload',
   description : 'upload incre files to cdn',
   handler : function(){
-    upload();
+    var opt = process.argv[3];
+
+    if(opt){
+      if(opt == '-l'){//incre upload -l - 查看待上传的文件
+        upload(-1);
+      }
+      else{//incre upload 1,2,3,4... or incre upload 0
+        upload(opt);
+      }
+    }
+    else{
+      console.log('  Warning : option required'.yellow);
+    }
   }
 });
 
 incre.commander.command({
   cmd : 'markdown',
-  description : 'turn markdown file to html file',
+  description : 'turn md file to html file',
   handler : function(){
     markdown();
   }

@@ -6,6 +6,11 @@ module.exports = {
   path_prefix : 'js/',//腾讯CMS专用
   csspath_prefix : 'css/',//腾讯CMS专用
   retina_image : false,//腾讯CMS专用(将autoRetina的图片文件名'@2x'改为'-2x')
+  jsugly : {//jsugly option配置
+    mangle : {//配置不被mangle的字符串
+      except : ['define', 'require', 'exports', 'module']
+    }
+  },
   merge : {//合并js
     // 'mobi/core.js' : [
     //     'lib/zepto/zepto-1.1.4.min.js',
