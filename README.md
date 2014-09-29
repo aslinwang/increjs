@@ -86,3 +86,6 @@ Change Log
 22 Sept. 2014
  * 增加`jsugly`配置。例如可以配置不被jsugly mangle掉的字符串
  * 增加`incre upload -l`, `incre upload 1,2`, `incre upload 0`
+
+29 Sept. 2014
+ * css minify的时候不使用高级优化选项(noAdvanced)
