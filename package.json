@@ -1,10 +1,6 @@
 ﻿{
   "name": "increjs",
-<<<<<<< HEAD
   "version": "1.1.9",
-=======
-  "version": "1.1.8",
->>>>>>> d25bbe2e208fb1596721c50c7a74b15095a368ec
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
