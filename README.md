@@ -53,4 +53,47 @@ increjs是一个js构建工具，最终生成并上传带版本信息的js文件
 
 Change Log
 ----------
+<<<<<<< HEAD
 [change log](CHANGELOG.md)
+=======
+29 July 2014
+ * 完成increjs的基本功能，init、build、upload、clear等
+
+20 Aug. 2014
+ * 支持对js文件的普通build、upload，不生成增量文件
+
+23 Aug. 2014
+ * 支持多个js文件merge到一个js文件
+ * 支持构建并上传css文件
+ * 支持构建前端模版特性
+
+25 Aug. 2014
+ * 构建模板时，还可以构建与模板相关的css文件
+ * 支持转化markdown文件为html文件，便于浏览
+
+26 Aug. 2014
+ * 在未执行初始化操作时，也能使用`incre -v`和`incre`命令
+ * 优化markdown文件html化之后的展现样式
+
+30 Aug. 2014
+ * 提供sample/demo目录，便于理解increjs的使用
+ * 构建html功能，专为页面重构工作开发。支持公共页面片提取，页面片模板变量声明等
+
+3 Sept. 2014
+ * `incre html`去BOM
+
+8 Sept. 2014
+ * `incre html -w`监控html根目录下文件改动，自动进行build操作
+ * `incre html`去BOM, fix bug
+
+15 Sept. 2014
+ * 增加retina_image配置，将css文件中含有的"main@2x.png"转为"main-2x.png"，以解决部分CMS不支持上传文件名带有@字符的文件的问题
+ * 支持构建除utf-8以外编码（如gbk）的html，修复去BOM的bug
+
+22 Sept. 2014
+ * 增加`jsugly`配置。例如可以配置不被jsugly mangle掉的字符串
+ * 增加`incre upload -l`, `incre upload 1,2`, `incre upload 0`
+
+29 Sept. 2014
+ * css minify的时候不使用高级优化选项(noAdvanced)
+>>>>>>> d25bbe2e208fb1596721c50c7a74b15095a368ec
