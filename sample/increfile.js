@@ -3,6 +3,7 @@ module.exports = {
   chunk : 20,//块大小
   cdnpath : 'http://mat1.gtimg.com/auto/js/',
   cdncsspath : 'http://mat1.gtimg.com/auto/css/',
+  cdncssimgpath : 'http://mat1.gtimg.com/auto/css/',
   path_prefix : 'js/',//腾讯CMS专用
   csspath_prefix : 'css/',//腾讯CMS专用
   retina_image : false,//腾讯CMS专用(将autoRetina的图片文件名'@2x'改为'-2x')
@@ -17,6 +18,15 @@ module.exports = {
     //     'lib/seajs/sea-2.3.0.min.js',
     //     'lib/x/x.js',
     //     'mobi/auto.js'
+    // ]
+  },
+  cssprite : {//css sprite图片配置,配合cssgaga使用
+    // 'root' : 'mobi/css/dist/',
+    // 'cdnpath_prefix' : 'css/',//腾讯CMS专用
+    // 'cdnpath' : 'mobi/sprite/',
+    // 'main.css' : [
+    //   'sprite/main.png',
+    //   'sprite/main@2x.png'
     // ]
   },
   src : {//需要build的文件对象(文件名:cdn上全量文件版本号)

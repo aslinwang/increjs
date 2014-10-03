@@ -80,14 +80,14 @@ function addZero(v){
 
 function printLogInfo(logInfo){
   console.log('');
-  console.log('  incre file list:'.green);
+  console.log('  file list:'.green);
   console.log('  file\t\ttotal\t\tsaving'.cyan);
   incre.gear._.each(logInfo, function(v, k){
     if(v.status == 'ok'){
       console.log(('  ' + k + '\t\t' + v.total + '\t\t' + v.saving).grey);
     }
     else if(v.status == 'error'){
-      console.log(('  ' + k + '\t\tfail to generate incre file').red);
+      console.log(('  ' + k + '\t\tfail to generate file').red);
     }
   });
   console.log('');
@@ -181,7 +181,9 @@ var Template = (function(){
         incre.fs.readFile(val).done(function(data){
           var code = '', file = '';
           if(val.indexOf('.css') != -1){//css文件
-            code = ["define('css/", key, "','", new cleancss().minify(data) , "');"].join('');
+            code = ["define('css/", key, "','", new cleancss({
+              noAdvanced : true
+            }).minify(data) , "');"].join('');
             file = tmplDir + tmplKey + '/' + key + '.css.js';
           }
           else{//html文件
@@ -190,10 +192,10 @@ var Template = (function(){
           }
           incre.fs.writeFile(file, code, function(err){
             if(err){
-              console.log(('  Error : write incre file ' + file + 'failed!').red);
+              console.log(('  Error : write tmplate file ' + file + 'failed!').red);
             }
             else{
-              console.log('  Info : write incre file ' + file + ' success.');
+              console.log('  Info : write tmplate file ' + file + ' success.');
             }
           }, incre.config.base);
 
@@ -248,117 +250,225 @@ var Template = (function(){
   };
 }());
 
-//build process
-function build(){
+// build process
+// @param imgcss 包含图片的css文件数组
+var build = (function(){
   var d = new Date();
   var ver = d.getFullYear().toString().slice(2) + addZero(d.getMonth() + 1) + addZero(d.getDate());
-  var uploadDir = incre.config.base + '.incre/upload/';
-  var logInfo = incre.gear.listen.add({}, function(logs){
-    if(incre.gear.jsonsize(logs) == incre.gear.jsonsize(incre.config.src)){
-      printLogInfo(logs);
+  
+  function cssprite(file, imgcss, callback){
+    var uploadDir = incre.config.base + '.incre/upload/';
+    if(!incre.config.cssprite || !imgcss){
+      return;
     }
-  });
-  clear();
+    if(incre.config.cssprite.root){
+      incre.CONFIG.cssprite_root = incre.config.cssprite.root;
+      delete incre.config.cssprite.root;
+    }
+    if(incre.config.cssprite.cdnpath){
+      incre.CONFIG.cssprite_cdnpath = incre.config.cssprite.cdnpath;
+      delete incre.config.cssprite.cdnpath;
+    }
+    if(incre.config.cssprite.cdnpath_prefix){
+      incre.CONFIG.cssprite_cdnpath_prefix = incre.config.cssprite.cdnpath_prefix;
+      delete incre.config.cssprite.cdnpath_prefix;
+    }
+    incre.gear._.each(incre.config.cssprite, function(v, k){
+      if(incre.CONFIG.cssprite_root + k == file){
+        //上传css图片，并修改版本号。考虑异步调用对后面写文件操作的影响
+        //1、将图片复制到上传目录中
+        //2、获取图片的索引
+        //3、上传图片
+        v = incre.gear._.map(v, function(i){
+          return incre.CONFIG.cssprite_root + i;
+        });
+        var v2 = incre.gear._.clone(v);
+        incre.fs.copyFiles(v, uploadDir, [
+          { regexp : '@', replacement : '-'},
+          { regexp : '.png', replacement : '_'+ver+'.png'}
+        ]).done(function(v1){
+          console.log('  Info : write css sprite images success.');
 
-  merge().done(function(mergeCodes){
-    //build js/css
-    incre.gear._.each(incre.config.src, function(v, k){//@todo 这里each(同步)和readFile(异步)之间可能有问题
-      var newfile = incre.config.base + k;
-      (function(newfile, v, k){
-        incre.fs.readFile(newfile, true).done(function(data){
-          var newcode = '';
-          if(data){//区分js和css
-            if(newfile.indexOf('.js') != -1){
-              newcode = jsmin(data).code;//jsmin
-              newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
+          var filePathMap = {};
+          incre.gear._.each(v2, function(value, key){
+            value = path.basename(value.replace('@', '-'));
+            filePathMap[value] = incre.CONFIG.cssprite_cdnpath;
+          });
+
+          v1 = incre.gear._.map(v1, function(i){
+            return incre.uploader.indexOf(i, uploadDir);
+          });
+
+          incre.uploader.uploadDir(uploadDir, v1, {
+            cdnpath : incre.config.cdnpath,
+            cdncsspath : incre.config.cdncsspath,
+            path_prefix : incre.config.path_prefix,
+            csspath_prefix : incre.config.csspath_prefix,
+            pathmap : incre.config.pathmap,
+            filePathMap : incre.gear._.extend(filePathMap, getFilePathMap()),
+            cdn_prefix : incre.CONFIG.cssprite_cdnpath_prefix,
+            cdn : incre.config.cdncssimgpath
+          }, function(verObj){
+            console.log('  Info : upload css sprite images success.'.green);
+
+            if(callback){
+              callback(verObj);
             }
-            else if(newfile.indexOf('.css') != -1){
-              newcode = new cleancss().minify(data);
+          });
+
+        });
+      }
+    });
+  }
+
+  function gendist(cfg){
+    var tmpfile = cfg.tmpfile,
+        newcode = cfg.newcode,
+        newfileName = cfg.newfileName,
+        v = cfg.v,
+        k = cfg.k,
+        newfileInfo = cfg.newfileInfo,
+        uploadDir = cfg.uploadDir,
+        logInfo = cfg.logInfo;
+
+    fs.writeFile(tmpfile, newcode, function(err){
+      if(err){
+        console.log(('  Error : write file ' + newfileName + ' failed!').red);
+      }
+      else{
+        console.log('  Info : write file ' + newfileName + ' success.');
+      }
+    });
+
+    if(v.trim() != '' && v.trim() != '-'){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
+      //计算增量文件
+      var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
+      var jsKey = k.replace('.js', '');
+      var logObj = {};
+      incre.fs.readFile(cdnfile).done(function(data1){
+        var oldcode = data1;
+
+        var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
+        increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
+        increObj.total = newcode.length;//全量字符数
+        var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
+
+        //写增量文件
+        var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
+        var increfile = uploadDir + increfileName;
+
+        fs.writeFile(increfile, increcode, function(err){
+          if(err){
+            logObj[jsKey] = {
+              status : 'error'
+            };
+            incre.gear.listen.set(logInfo, logObj);
+            console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
+          }
+          else{
+            logObj[jsKey] = {
+              status : 'ok',
+              total : increObj.total,
+              saving : increObj.saving
+            };
+            incre.gear.listen.set(logInfo, logObj);
+            console.log('  Info : write incre file ' + increfileName + ' success.');
+          }
+        });
+      }, function(err){
+        console.log(('  Error : ' + err).red);
+        logObj[jsKey] = {
+          status : 'error'
+        }
+        incre.gear.listen.set(logInfo, logObj);
+      });
+    }
+  }
+
+  return function(imgcss){
+    var uploadDir = incre.config.base + '.incre/upload/';
+    var logInfo = incre.gear.listen.add({}, function(logs){
+      if(incre.gear.jsonsize(logs) == incre.gear.jsonsize(incre.config.src)){
+        printLogInfo(logs);
+      }
+    });
+    clear();
+
+    merge().done(function(mergeCodes){
+      //build js/css
+      incre.gear._.each(incre.config.src, function(v, k){//@todo 这里each(同步)和readFile(异步)之间可能有问题
+        var newfile = incre.config.base + k;
+        (function(newfile, v, k){
+          incre.fs.readFile(newfile, true).done(function(data){
+            var newcode = '';
+            if(data){//区分js和css
+              if(newfile.indexOf('.js') != -1){
+                newcode = jsmin(data).code;//jsmin
+                newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
+              }
+              else if(newfile.indexOf('.css') != -1){
+                newcode = new cleancss().minify(data);
+              }
+            }
+            else{
+              if(mergeCodes[k] && mergeCodes[k].length > 0){//合并文件
+                newcode = mergeCodes[k].join('\n');
+                newcode = jsmin(newcode).code;//jsmin
+                newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
+              }
+            }
+            
+            //写全量文件
+            var newfileInfo = newfile.split('/');
+            var newfileName = (v == '-' ? newfileInfo[newfileInfo.length - 1] : newfileInfo[newfileInfo.length - 1].replace(/(\.(js|css))$/, '_' + ver + '$1'));
+            var tmpfile = uploadDir + newfileName;
+
+            var cfg = {
+              tmpfile : tmpfile,
+              newcode : newcode,
+              newfileName : newfileName,
+              v : v,
+              k : k,
+              newfileInfo : newfileInfo,
+              uploadDir : uploadDir,
+              logInfo : logInfo
+            };
+
+            //如果是样式文件，在minify之后，再处理sprite图片
+            if(newfile.indexOf('.css') != -1){
               if(incre.config.retina_image){
                 newcode = newcode.replace(/@2x\.png/g, '-2x.png');//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
                 if(newcode.indexOf('-2x.png') != -1){
                   console.log(('  Warning : file ' + newfile + ' has retina images! Turn their names to "*-2x.png"!').yellow);
                 }
               }
-            }
-          }
-          else{
-            if(mergeCodes[k] && mergeCodes[k].length > 0){//合并文件
-              newcode = mergeCodes[k].join('\n');
-              newcode = jsmin(newcode).code;//jsmin
-              newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
-            }
-          }
-          
-          //写全量文件
-          var newfileInfo = newfile.split('/');
-          var newfileName = (v == '-' ? newfileInfo[newfileInfo.length - 1] : newfileInfo[newfileInfo.length - 1].replace(/(\.(js|css))$/, '_' + ver + '$1'));
-          var tmpfile = uploadDir + newfileName;
-
-          fs.writeFile(tmpfile, newcode, function(err){
-            if(err){
-              console.log(('  Error : write file ' + newfileName + ' failed!').red);
+              cssprite(k, imgcss, function(verObj){
+                incre.gear._.each(verObj, function(v1, k1){//cssgaga 不能再设置sprite新文件名
+                  var regexp = new RegExp(k1.replace(/\./g, '\.'), 'g');
+                  var ext = path.extname(k1);
+                  var replacement = [k1.replace(ext, ''), '_', v1, ext].join('');
+                  newcode = newcode.replace(regexp, replacement);
+                });
+                cfg.newcode = newcode;
+                gendist(cfg);
+              });
             }
             else{
-              console.log('  Info : write file ' + newfileName + ' success.');
+              gendist(cfg);
             }
           });
+        }(newfile, v, k));
+      });
 
-          if(v.trim() != '' && v.trim() != '-'){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
-            //计算增量文件
-            var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
-            var jsKey = k.replace('.js', '');
-            var logObj = {};
-            incre.fs.readFile(cdnfile).done(function(data1){
-              var oldcode = data1;
-
-              var increObj = incre.makeincre(oldcode, newcode, incre.config.chunk || 20);
-              increObj.saving = newcode.length - JSON.stringify(increObj).length;//节省请求的字符数
-              increObj.total = newcode.length;//全量字符数
-              var increcode = 'increCallback_' + jsKey.replace(/\//g, '_') + '=' + JSON.stringify(increObj);
-
-              //写增量文件
-              var increfileName = newfileInfo[newfileInfo.length - 1].replace('.js', '_' + v + '_$.js');
-              var increfile = uploadDir + increfileName;
-
-              fs.writeFile(increfile, increcode, function(err){
-                if(err){
-                  logObj[jsKey] = {
-                    status : 'error'
-                  };
-                  incre.gear.listen.set(logInfo, logObj);
-                  console.log(('  Error : write incre file ' + increfileName + 'failed!').red);
-                }
-                else{
-                  logObj[jsKey] = {
-                    status : 'ok',
-                    total : increObj.total,
-                    saving : increObj.saving
-                  };
-                  incre.gear.listen.set(logInfo, logObj);
-                  console.log('  Info : write incre file ' + increfileName + ' success.');
-                }
-              });
-            }, function(err){
-              console.log(('  Error : ' + err).red);
-              logObj[jsKey] = {
-                status : 'error'
-              }
-              incre.gear.listen.set(logInfo, logObj);
-            });
-          }
-        });
-      }(newfile, v, k));
+      //build template
+      if(Template.isenable()){
+        Template.build();
+      }
     });
 
-    //build template
-    if(Template.isenable()){
-      Template.build();
-    }
-  });
-
-  console.log('  Info : start building js, css and template'.green);
-}
+    console.log('  Info : start building js, css and template'.green);
+  }
+}());
 
 var Html = (function(){
   // 模板语法：
@@ -488,10 +598,10 @@ var Html = (function(){
             }
             incre.fs.writeFile(file, res, function(err){
               if(err){
-                console.log(('  Error : write incre file ' + file + 'failed!').red);
+                console.log(('  Error : write static html file ' + file + 'failed!').red);
               }
               else{
-                console.log('  Info : write incre file ' + file + ' success.');
+                console.log('  Info : write static html file ' + file + ' success.');
               }
 
               exec();
@@ -517,11 +627,11 @@ function upload(opt){
   }
   var uploadDir = incre.config.base + '.incre/upload/';
   if(opt == -1){//查看上传列表
-    incre.listDir(uploadDir);
+    incre.uploader.listDir(uploadDir);
   }
   else{
     console.log('  Info : start uploading'.green);
-    incre.uploadDir(uploadDir, opt.split(','), {
+    incre.uploader.uploadDir(uploadDir, opt.split(','), {
       cdnpath : incre.config.cdnpath,
       cdncsspath : incre.config.cdncsspath,
       path_prefix : incre.config.path_prefix,
@@ -554,10 +664,10 @@ function markdown(){
         var file = htmlRoot + md + '.html';
         incre.fs.writeFile(file, data, function(err){
           if(err){
-            console.log(('  Error : write incre file ' + file + 'failed!').red);
+            console.log(('  Error : write markdown file ' + file + 'failed!').red);
           }
           else{
-            console.log('  Info : write incre file ' + file + ' success.');
+            console.log('  Info : write markdown file ' + file + ' success.');
           }
         }, incre.config.base);
 
@@ -605,10 +715,19 @@ incre.commander.command({
 });
 
 incre.commander.command({
-  cmd : 'build',
+  cmd : 'build',//incre build -uic=main.css,test.css //update image in css
   description : 'build to generate incre files',
   handler : function(){
-    build();
+    var opt = process.argv[3];
+
+    if(opt && opt.indexOf('-uic') != -1){//有参数
+      opt = opt.replace(/^-uic=/, '');
+      opt = opt.split(',');
+      build(opt);
+    }
+    else{
+      build();
+    }
   }
 });
 
@@ -707,6 +826,7 @@ else if(process.argv[2] == 'init'){//incre init
 else{
   if(config){//有配置
     incre.config = require(path.join(config, 'increfile.js'));
+    incre.CONFIG = {};//因为配置结构设计，将某些配置存在内存中
     incre.commander.run();
   }
   else{//无配置
