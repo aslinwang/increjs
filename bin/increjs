@@ -27,6 +27,7 @@ var projConf = require('../package.json');
 //upload过程提供接口供用户自己实现
 //build模版时，需要处理模版依赖的样式文件（为单独文件，不写在模板html中）
 var incre = module.exports = require('../index.js');
+var configfile;
 
 function initConfig(){
   var base = './';
@@ -256,9 +257,12 @@ var build = (function(){
   var d = new Date();
   var ver = d.getFullYear().toString().slice(2) + addZero(d.getMonth() + 1) + addZero(d.getDate());
   
-  function cssprite(file, imgcss, callback){
+  function cssprite(file, imgcss, success, fail){
     var uploadDir = incre.config.base + '.incre/upload/';
-    if(!incre.config.cssprite || !imgcss){
+    if(!incre.config.cssprite){//@todo 如果有上次储存的图片版本号，则持续向下执行
+      if(fail){
+        fail();
+      }
       return;
     }
     if(incre.config.cssprite.root){
@@ -279,44 +283,58 @@ var build = (function(){
         //1、将图片复制到上传目录中
         //2、获取图片的索引
         //3、上传图片
-        v = incre.gear._.map(v, function(i){
-          return incre.CONFIG.cssprite_root + i;
+        var vers = {};//版本号对象,basename
+        var f = [];//图片文件列表
+        incre.gear._.each(v, function(_ver, _f){
+          f.push(_f);
+          vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
         });
-        var v2 = incre.gear._.clone(v);
-        incre.fs.copyFiles(v, uploadDir, [
-          { regexp : '@', replacement : '-'},
-          { regexp : '.png', replacement : '_'+ver+'.png'}
-        ]).done(function(v1){
-          console.log('  Info : write css sprite images success.');
 
-          var filePathMap = {};
-          incre.gear._.each(v2, function(value, key){
-            value = path.basename(value.replace('@', '-'));
-            filePathMap[value] = incre.CONFIG.cssprite_cdnpath;
+        if(imgcss){
+          v = incre.gear._.map(f, function(i){
+            return incre.CONFIG.cssprite_root + i;
           });
+          var v2 = incre.gear._.clone(v);
+          incre.fs.copyFiles(v, uploadDir, [
+            { regexp : '@', replacement : '-'},
+            { regexp : '.png', replacement : '_'+ver+'.png'}
+          ]).done(function(v1){
+            console.log('  Info : write css sprite images success.');
 
-          v1 = incre.gear._.map(v1, function(i){
-            return incre.uploader.indexOf(i, uploadDir);
+            var filePathMap = {};
+            incre.gear._.each(v2, function(value, key){
+              value = path.basename(value.replace('@', '-'));
+              filePathMap[value] = incre.CONFIG.cssprite_cdnpath;
+            });
+
+            v1 = incre.gear._.map(v1, function(i){
+              return incre.uploader.indexOf(i, uploadDir);
+            });
+
+            incre.uploader.uploadDir(uploadDir, v1, {
+              cdnpath : incre.config.cdnpath,
+              cdncsspath : incre.config.cdncsspath,
+              path_prefix : incre.config.path_prefix,
+              csspath_prefix : incre.config.csspath_prefix,
+              pathmap : incre.config.pathmap,
+              filePathMap : incre.gear._.extend(filePathMap, getFilePathMap()),
+              cdn_prefix : incre.CONFIG.cssprite_cdnpath_prefix,
+              cdn : incre.config.cdncssimgpath
+            }, function(verObj){
+              console.log('  Info : upload css sprite images success.'.green);
+
+              if(success){
+                success(verObj);
+              }
+            });
           });
-
-          incre.uploader.uploadDir(uploadDir, v1, {
-            cdnpath : incre.config.cdnpath,
-            cdncsspath : incre.config.cdncsspath,
-            path_prefix : incre.config.path_prefix,
-            csspath_prefix : incre.config.csspath_prefix,
-            pathmap : incre.config.pathmap,
-            filePathMap : incre.gear._.extend(filePathMap, getFilePathMap()),
-            cdn_prefix : incre.CONFIG.cssprite_cdnpath_prefix,
-            cdn : incre.config.cdncssimgpath
-          }, function(verObj){
-            console.log('  Info : upload css sprite images success.'.green);
-
-            if(callback){
-              callback(verObj);
-            }
-          });
-
-        });
+        }
+        else{
+          if(success){
+            console.log(vers);
+            success(vers);
+          }
+        }
       }
     });
   }
@@ -443,6 +461,7 @@ var build = (function(){
                 if(newcode.indexOf('-2x.png') != -1){
                   console.log(('  Warning : file ' + newfile + ' has retina images! Turn their names to "*-2x.png"!').yellow);
                 }
+                cfg.newcode = newcode;
               }
               cssprite(k, imgcss, function(verObj){
                 incre.gear._.each(verObj, function(v1, k1){//cssgaga 不能再设置sprite新文件名
@@ -452,6 +471,8 @@ var build = (function(){
                   newcode = newcode.replace(regexp, replacement);
                 });
                 cfg.newcode = newcode;
+                gendist(cfg);
+              }, function(){
                 gendist(cfg);
               });
             }
@@ -815,7 +836,7 @@ incre.commander.command({
 
 incre.commander.version(projConf.version);
 
-var config = checkConfig();
+var configfile = checkConfig();
 if(!process.argv[2]){//incre help
   incre.commander.run(['-h']);
 }
@@ -826,8 +847,8 @@ else if(process.argv[2] == 'init'){//incre init
   incre.commander.run(['init']);
 }
 else{
-  if(config){//有配置
-    incre.config = require(path.join(config, 'increfile.js'));
+  if(configfile){//有配置
+    incre.config = require(path.join(configfile, 'increfile.js'));
     incre.CONFIG = {};//因为配置结构设计，将某些配置存在内存中
     incre.commander.run();
   }

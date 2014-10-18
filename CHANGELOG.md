@@ -1,6 +1,6 @@
 change log
 ============
-3 Oct. 2014
+18 Oct. 2014
  * 支持`incre build -uic=main.css`模式
 
 29 Sept. 2014

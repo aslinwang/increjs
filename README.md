@@ -19,7 +19,7 @@ Usage
 
 `incre build -uic=main.css`
 
-命令行执行，表示在构建时，main.css文件中的css sprite图片有更新。在构建过程中会对这些文件按照配置进行上传、打版本号
+命令行执行，表示在构建时，main.css文件中的css sprite图片有更新。在构建过程中会对这些文件按照配置进行上传、打版本号。build过程结束后，需要将获得的sprite图片版本号回写到`.incre/increfile.js`文件中
 
 `incre html`，`incre html -w`
 
@@ -47,9 +47,7 @@ Usage
 
 Attention
 ---------
-**与[seajs-appcache](http://github.com/aslinwang/seajs-appcache)配合使用**
 
-increjs是一个js构建工具，最终生成并上传带版本信息的js文件，在开发过程中，使用seajs插件，seajs-appcache，可以加载符合条件的增量文件。详见[seajs-appcache](http://github.com/aslinwang/seajs-appcache)说明
 
 Change Log
 ----------
