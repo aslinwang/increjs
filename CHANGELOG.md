@@ -3,6 +3,7 @@ change log
 17 Nov. 2014
  * 重构代码，采用plugins模式开发incre命令
  * 支持`incre gaga`命令，用于自动合并雪碧图(功能参考[CssGaga](http://www.99css.com/archives/542))
+ * fix bug:如果没有实现upload.js，则插件加载失败
 
 18 Oct. 2014
  * 支持`incre build -uic=main.css`模式
