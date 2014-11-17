@@ -1,6 +1,6 @@
 ﻿{
   "name": "increjs",
-  "version": "1.1.9",
+  "version": "2.0.0",
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
@@ -16,7 +16,11 @@
     "request": "~2.38.0",
     "gearjs": "~0.0.5",
     "chokidar": "~0.8.4",
-    "iconv-lite": "~0.4.4"
+    "iconv-lite": "~0.4.4",
+    "gmsmith": "~0.4.1",
+    "gm" : "~1.4.2",
+    "async": "~0.2.6",
+    "layout": "~2.0.0"
   },
   "devDependencies": {
     "mocha": "*",
