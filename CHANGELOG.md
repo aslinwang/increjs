@@ -1,5 +1,8 @@
 change log
 ============
+20 Nov. 2014
+ * fix bug:`incre gaga`时，autoRetina部分的样式顺序有误
+
 17 Nov. 2014
  * 重构代码，采用plugins模式开发incre命令
  * 支持`incre gaga`命令，用于自动合并雪碧图(功能参考[CssGaga](http://www.99css.com/archives/542))

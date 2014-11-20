@@ -284,7 +284,11 @@ var GaGa = (function(){
               }
               else{
                 var dist_sprite2x = dist + css.replace('.css', '@2x.') + 'png';
-                coordinates.sprite2x = result.coordinates;
+                coordinates.sprite2x = {};
+                incre.gear._.each(imgList2x, function(v,k){
+                  coordinates.sprite2x[v] = result.coordinates[v];
+                });
+
                 fs.writeFile(dist_sprite2x, result.image, 'binary', function(err){
                   if(err){
                     console.log(('  Error:' + err).red);
