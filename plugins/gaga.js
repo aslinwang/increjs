@@ -21,13 +21,7 @@ var incre;
 // spritesmith
 // https://github.com/Ensighten/spritesmith
 var Spritesmith = (function(){
-  var engine;
-  try{
-    var engine = require('gmsmith');
-    var gm = require('gm');
-  }catch(e){
-    console.log('  Error : has no gmsmith engine!'.red);
-  }
+  var engine,gm;
 
   function EngineSmith($engine){
     this.engine = $engine;
@@ -105,6 +99,14 @@ var Spritesmith = (function(){
     var retObj = {},
         files = params.src,
         algorithmPref = params.algorithm || 'top-down';
+
+    try{
+      engine = require('gmsmith');
+      gm = require('gm');
+    }catch(e){
+      console.log('  Error : has no gmsmith engine! Please install GraphicsMagick lib and reinstall increjs! https://github.com/aslinwang/increjs/issues/3'.red);
+      return;
+    }
 
     // If there is a set parameter for the engine, use it
     if(engine.set){
@@ -200,9 +202,13 @@ var Spritesmith = (function(){
     ], callback);
   }
 
+  function getGm(){
+    return gm;
+  }
+
   return {
     build : build,
-    gm : gm
+    gm : getGm
   }
 }());
 
@@ -293,7 +299,7 @@ var GaGa = (function(){
                   if(err){
                     console.log(('  Error:' + err).red);
                   }
-                  Spritesmith.gm(dist_sprite2x).size(function(err, size){
+                  Spritesmith.gm()(dist_sprite2x).size(function(err, size){
                     if(!err){
                       retinaSize = size;
                       cb(null);

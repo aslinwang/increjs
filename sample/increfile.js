@@ -20,14 +20,25 @@ module.exports = {
     //     'mobi/auto.js'
     // ]
   },
+  gaga : {
+    // 'engine' : {//gm engine config
+    //   'algorithm' : 'binary-tree',
+    //   'padding' : 4
+    // },
+    // 'root' : 'mobi/css/',//样式根目录
+    // 'slice' : 'img/slice/',//切片图目录root+slice
+    // 'src' : [
+    //   'main.css'
+    // ]
+  },
   cssprite : {//css sprite图片配置,配合cssgaga使用
-    // 'root' : 'mobi/css/dist/',
+    // 'root' : '.incre/gaga/',
     // 'cdnpath_prefix' : 'css/',//腾讯CMS专用
     // 'cdnpath' : 'mobi/sprite/',
-    // 'main.css' : [
-    //   'sprite/main.png',
-    //   'sprite/main@2x.png'
-    // ]
+    // 'main.css' : {
+    //   'main.png' : '141113',//样式中雪碧图及其版本号
+    //   'main@2x.png' : '141113'
+    // }
   },
   src : {//需要build的文件对象(文件名:cdn上全量文件版本号)
     // 'm/t/page.js' : 140717,//path+filename,文件filename最终会上传至cdnpath+path下

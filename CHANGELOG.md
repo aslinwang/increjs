@@ -1,5 +1,9 @@
 change log
 ============
+22 Nov. 2014
+ * 优化安装。如果未安装GraphicsMagick库，也能安装increjs工具，除`incre gaga`之外的命令仍可使用
+ * 更新sample/increfile.js配置
+
 20 Nov. 2014
  * fix bug:`incre gaga`时，autoRetina部分的样式顺序有误
 
