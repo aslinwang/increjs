@@ -13,6 +13,10 @@ Usage
 
 命令行进入到工作目录，如:jsdev/，然后执行此命令，将会在此目录下生成`.incre`目录，里面存放配置信息和一些临时文件
 
+`incre gaga`
+
+命令行执行，根据配置处理样式文件中的css sprite图片，合并图片并自动处理样式代码，自动适配retina屏幕设备。详见：https://github.com/aslinwang/increjs/issues/3
+
 `incre build`
 
 命令行执行，将会根据配置文件`.incre/increfile.js`进行编译，生成相应的全量文件和增量文件
