@@ -1,5 +1,8 @@
 change log
 ============
+23 Nov. 2014
+ * 修改gaga中文件路径相关部分，便于将.incre配置目录移动到项目内部进行管理
+
 22 Nov. 2014
  * 优化安装。如果未安装GraphicsMagick库，也能安装increjs工具，除`incre gaga`之外的命令仍可使用
  * 更新sample/increfile.js配置

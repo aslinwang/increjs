@@ -348,10 +348,10 @@ var build = (function(){
 
     fs.writeFile(tmpfile, newcode, function(err){
       if(err){
-        console.log(('  Error : write file ' + newfileName + ' failed!').red);
+        console.log(('  Error : write file ' + tmpfile + ' failed!').red);
       }
       else{
-        console.log('  Info : write file ' + newfileName + ' success.');
+        console.log('  Info : write file ' + tmpfile + ' success.');
       }
     });
 

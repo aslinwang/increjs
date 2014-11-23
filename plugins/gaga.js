@@ -248,7 +248,7 @@ var GaGa = (function(){
     var imgList = slices;
     var imgList2x = slices2x;
 
-    var prefix = './mobi/css/';
+    var prefix = incre.config.base + root;
     var retinaSize;
 
     imgList = incre.gear._.map(imgList, function(img){
@@ -346,14 +346,6 @@ var GaGa = (function(){
               
               selectors[key] = selector;
             });
-            // code = code.replace(/(.*){background-image\s*:\s*url\((.*)\)/g, function(match,group,str){
-            //   var img = group.replace(/\'/g, '').replace(/\"/g, '');
-            //   if(img.indexOf('slice') != -1){
-            //     slices.push(path.basename(img));
-            //     slices2x.push(path.basename(img).replace('.png', '@2x.png'));
-            //   }
-            //   return match;
-            // });
 
             var retinaCode = '\n\n@media only screen and (-webkit-min-device-pixel-ratio: 1.5),only screen and (min--moz-device-pixel-ratio: 1.5),only screen and (min-resolution: 240dpi)\n{';
             var rw = Math.floor(retinaSize.width/2),
@@ -418,18 +410,18 @@ var GaGa = (function(){
       });
     });
 
-    // √1、获取css文件中的background-image图片
-    // √2、从incre.config.slice目录中获取1中图片
+    // 1、获取css文件中的background-image图片
+    // 2、从incre.config.slice目录中获取1中图片
     // 3、将2中图片合并（如果retina=true，则合并两份），并记录每张图的position(难点！)
     // 4、替换css文件的background-image和background-position属性
     // 5、增加media query，对retina设备的支持
     //
-    //x.css->.incre/gaga/x.css(文件内容改变)：incre gaga
+    // x.css->.incre/gaga/x.css(文件内容改变)：incre gaga
     //
-    //如果雪碧图有更新：incre build -uic=x.css  记得回写cssprite版本号
-    //如果雪碧图无更新：incre build
+    // 如果雪碧图有更新：incre build -uic=x.css  记得回写cssprite版本号
+    // 如果雪碧图无更新：incre build
     //
-    //上传文件：incre upload x
+    // 上传文件：incre upload x
     
 
   }
