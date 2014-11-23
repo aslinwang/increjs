@@ -49,10 +49,6 @@ Usage
 
 命令行执行，清除`.incre`目录下的临时文件
 
-Attention
----------
-
-
 Change Log
 ----------
 [change log](CHANGELOG.md)
