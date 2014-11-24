@@ -5,7 +5,8 @@ increjs
 
 Install
 -------
-`npm install increjs -g`
+* 安装图形处理库[GraphicsMagick](https://github.com/aslinwang/increjs/tree/master/misc)(如果需要用到`incre gaga`)
+* `npm install increjs -g`
 
 Usage
 -----
