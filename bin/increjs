@@ -63,6 +63,9 @@ function getFilePathMap(){
     var fileInfo = k.split('/');
     var fileName = fileInfo[fileInfo.length - 1];
     var filePath = k.replace(fileName, '');
+    if(!incre.config.pathmap[filePath] && incre.config.project){
+      filePath = incre.config.project + '/' + filePath;
+    }
     filePathMap[fileName] = filePath;
   });
   return filePathMap;
@@ -502,14 +505,14 @@ function upload(opt){
   }
   else{
     console.log('  Info : start uploading'.green);
-    incre.uploader.uploadDir(uploadDir, opt.split(','), {
+    incre.uploader.uploadDir(uploadDir, opt.split(','), incre.gear._.extend(incre.config, {
       cdnpath : incre.config.cdnpath,
       cdncsspath : incre.config.cdncsspath,
       path_prefix : incre.config.path_prefix,
       csspath_prefix : incre.config.csspath_prefix,
       pathmap : incre.config.pathmap,
       filePathMap : getFilePathMap()
-    }, function(){
+    }), function(){
       console.log('  Info : upload done'.green);
     });
   }

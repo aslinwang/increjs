@@ -270,7 +270,11 @@ var GaGa = (function(){
             }
             else{
               var dist_sprite = dist + css.replace('css', '') + 'png';
-              coordinates.sprite = result.coordinates;
+              coordinates.sprite = {};
+              incre.gear._.each(imgList, function(v,k){
+                coordinates.sprite[v] = result.coordinates[v];
+              });
+              
               fs.writeFile(dist_sprite, result.image, 'binary', function(err){
                 if(err){
                   console.log(('  Error:' + err).red);
@@ -342,20 +346,25 @@ var GaGa = (function(){
               key = key.replace(prefix, '');
               var selectorReg = new RegExp('(\\.?[^}]*?)\\s?{\\s?[^}]*?' + RegExp.escape(key), 'ig');
               var selectorRes = minicodes.match(selectorReg);
-              var selector = selectorRes.length > 0 ? selectorRes[0].replace(selectorReg, '$1') : null;
-              
-              selectors[key] = selector;
+
+              incre.gear._.each(selectorRes, function(res,idx){
+                var selector = res.replace(selectorReg, '$1');
+                selectors[selector] = key;
+              });
             });
 
             var retinaCode = '\n\n@media only screen and (-webkit-min-device-pixel-ratio: 1.5),only screen and (min--moz-device-pixel-ratio: 1.5),only screen and (min-resolution: 240dpi)\n{';
             var rw = Math.floor(retinaSize.width/2),
                 rh = Math.floor(retinaSize.height/2);
-            incre.gear._.each(coordinates.sprite2x, function(img, key){
-              var tmpkey = key.replace(prefix, '').replace('@2x', '');
+
+            incre.gear._.each(selectors, function(imgKey, selector){
+              var tmpkey = prefix + imgKey.replace('.png', '@2x.png');
+              var img = coordinates.sprite2x[tmpkey];
               
-              retinaCode += selectors[tmpkey];
+              retinaCode += selector;
               retinaCode += ['{background-image:url(sprite/', css.replace('.css', '@2x.png'), ');background-position:-', img.x/2, 'px -', img.y/2, 'px;background-size:', rw, 'px ', rh, 'px;}'].join('');
             });
+
             retinaCode += '\n}\n';
             cb(null, code + retinaCode);
           }

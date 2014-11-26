@@ -1,5 +1,8 @@
 change log
 ============
+26 Nov. 2014
+ * fix bug:`incre gaga`在处理retina code时,会漏掉相关代码
+
 23 Nov. 2014
  * 修改gaga中文件路径相关部分，便于将.incre配置目录移动到项目内部进行管理
 
