@@ -1,5 +1,8 @@
 change log
 ============
+28 Nov. 2014
+ * fix bug:`incre gaga`生成retina code时，如果不存在@2x图，报错停止。对此种情况容错
+
 26 Nov. 2014
  * fix bug:`incre gaga`在处理retina code时,会漏掉相关代码
 
