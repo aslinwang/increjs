@@ -403,6 +403,17 @@ var build = (function(){
     }
   }
 
+  // 将中文转为unicode编码
+  function dec2hex(codes){
+    var res = '';
+    res = codes.replace(/[\u4e00-\u9fa5]/g, function(match, group, str){
+      var hex = '\\u' + ("00"+match.charCodeAt(0).toString(16)).slice(-4);
+      return hex;
+    });
+
+    return res;
+  }
+
   return function(imgcss){
     var uploadDir = incre.config.base + '.incre/upload/';
     var logInfo = incre.gear.listen.add({}, function(logs){
@@ -419,7 +430,7 @@ var build = (function(){
         (function(newfile, v, k){
           incre.fs.readFile(newfile, true).done(function(data){
             var newcode = '';
-            if(data){//区分js和css
+            if(data && !mergeCodes[k]){//区分js和css && 非合并文件
               if(newfile.indexOf('.js') != -1){
                 newcode = jsmin(data).code;//jsmin
                 newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
@@ -442,6 +453,8 @@ var build = (function(){
             var newfileInfo = newfile.split('/');
             var newfileName = (v == '-' ? newfileInfo[newfileInfo.length - 1] : newfileInfo[newfileInfo.length - 1].replace(/(\.(js|css))$/, '_' + ver + '$1'));
             var tmpfile = uploadDir + newfileName;
+
+            newcode = dec2hex(newcode);
 
             var cfg = {
               tmpfile : tmpfile,
