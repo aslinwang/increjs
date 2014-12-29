@@ -311,7 +311,7 @@ var build = (function(){
               return incre.uploader.indexOf(i, uploadDir);
             });
 
-            incre.uploader.uploadDir(uploadDir, v1, {
+            incre.uploader.uploadDir(uploadDir, v1, incre.gear._.extend(incre.config, {
               cdnpath : incre.config.cdnpath,
               cdncsspath : incre.config.cdncsspath,
               path_prefix : incre.config.path_prefix,
@@ -320,7 +320,7 @@ var build = (function(){
               filePathMap : incre.gear._.extend(filePathMap, getFilePathMap()),
               cdn_prefix : incre.CONFIG.cssprite_cdnpath_prefix,
               cdn : incre.config.cdncssimgpath
-            }, function(verObj){
+            }), function(verObj){
               console.log('  Info : upload css sprite images success.'.green);
 
               if(success){
