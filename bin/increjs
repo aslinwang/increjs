@@ -19,6 +19,7 @@ var projConf = require('../package.json');
 //incre build 根据配置文件(increfile.js)生成增量文件，打印增量信息
 //incre upload 上传增量文件
 //incre compare -f1 -f2 比较文件f1与文件f2生成增量文件
+//incre gaga/incre build -uin=main.css 雪碧图将存储在incre.config.upload.cdncssimgpath + incre.config.upload.project + '/sprite'上
 //
 //build之前需要jsmin，再和线上的文件对比。jsuglify可能会影响增量文件的计算
 //upload过程提供接口供用户自己实现
@@ -63,8 +64,8 @@ function getFilePathMap(){
     var fileInfo = k.split('/');
     var fileName = fileInfo[fileInfo.length - 1];
     var filePath = k.replace(fileName, '');
-    if(!incre.config.pathmap[filePath] && incre.config.project){
-      filePath = incre.config.project + '/' + filePath;
+    if(!incre.config.pathmap[filePath] && incre.config.upload.project){
+      filePath = incre.config.upload.project + '/' + filePath;
     }
     filePathMap[fileName] = filePath;
   });
@@ -269,14 +270,6 @@ var build = (function(){
       incre.CONFIG.cssprite_root = incre.config.cssprite.root;
       delete incre.config.cssprite.root;
     }
-    if(incre.config.cssprite.cdnpath){
-      incre.CONFIG.cssprite_cdnpath = incre.config.cssprite.cdnpath;
-      delete incre.config.cssprite.cdnpath;
-    }
-    if(incre.config.cssprite.cdnpath_prefix){
-      incre.CONFIG.cssprite_cdnpath_prefix = incre.config.cssprite.cdnpath_prefix;
-      delete incre.config.cssprite.cdnpath_prefix;
-    }
     incre.gear._.each(incre.config.cssprite, function(v, k){
       if(incre.CONFIG.cssprite_root + k == file){
         //上传css图片，并修改版本号。考虑异步调用对后面写文件操作的影响
@@ -304,7 +297,7 @@ var build = (function(){
             var filePathMap = {};
             incre.gear._.each(v2, function(value, key){
               value = path.basename(value.replace('@', '-'));
-              filePathMap[value] = incre.CONFIG.cssprite_cdnpath;
+              filePathMap[value] = incre.config.upload.project + '/sprite/';
             });
 
             v1 = incre.gear._.map(v1, function(i){
@@ -312,14 +305,11 @@ var build = (function(){
             });
 
             incre.uploader.uploadDir(uploadDir, v1, incre.gear._.extend(incre.config, {
-              cdnpath : incre.config.cdnpath,
-              cdncsspath : incre.config.cdncsspath,
-              path_prefix : incre.config.path_prefix,
-              csspath_prefix : incre.config.csspath_prefix,
+              cdnpath : incre.config.upload.cdnpath,
+              cdncsspath : incre.config.upload.cdncsspath,
               pathmap : incre.config.pathmap,
               filePathMap : incre.gear._.extend(filePathMap, getFilePathMap()),
-              cdn_prefix : incre.CONFIG.cssprite_cdnpath_prefix,
-              cdn : incre.config.cdncssimgpath
+              cdn : incre.config.upload.cdncssimgpath
             }), function(verObj){
               console.log('  Info : upload css sprite images success.'.green);
 
@@ -360,7 +350,7 @@ var build = (function(){
 
     if(v.trim() != '' && v.trim() != '-'){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
       //计算增量文件
-      var cdnfile = incre.config.cdnpath + k.replace('.js', '_' + v + '.js');
+      var cdnfile = incre.config.upload.cdnpath + k.replace('.js', '_' + v + '.js');
       var jsKey = k.replace('.js', '');
       var logObj = {};
       incre.fs.readFile(cdnfile).done(function(data1){
@@ -519,10 +509,8 @@ function upload(opt){
   else{
     console.log('  Info : start uploading'.green);
     incre.uploader.uploadDir(uploadDir, opt.split(','), incre.gear._.extend(incre.config, {
-      cdnpath : incre.config.cdnpath,
-      cdncsspath : incre.config.cdncsspath,
-      path_prefix : incre.config.path_prefix,
-      csspath_prefix : incre.config.csspath_prefix,
+      cdnpath : incre.config.upload.cdnpath,
+      cdncsspath : incre.config.upload.cdncsspath,
       pathmap : incre.config.pathmap,
       filePathMap : getFilePathMap()
     }), function(){
@@ -648,6 +636,7 @@ else if(process.argv[2] == 'init'){//incre init
 else{
   if(configfile){//有配置
     incre.config = require(path.join(configfile, 'increfile.js'));
+    incre.config.upload = incre.config.upload || {};
     incre.CONFIG = {};//因为配置结构设计，将某些配置存在内存中
     incre.commander.run();
   }
