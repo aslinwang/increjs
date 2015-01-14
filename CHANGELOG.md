@@ -1,5 +1,8 @@
 change log
 ============
+1 Jan. 2015
+ * 确保小图的位置一定为偶数，以确保CSS的retina元素的background-position为整数
+
 30 Dec. 2014
  * 将上传部分以引擎的方式独立出来，供第三方结合自身业务特点自由实现
  * 优化`increfile.js`配置文件的编写

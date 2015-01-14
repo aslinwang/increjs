@@ -131,7 +131,10 @@ var Spritesmith = (function(){
               height = img.height,
               meta = {'img' : img, 'actualWidth' : width, 'actualHeight' : height};
 
-          layer.addItem({'width' : width + padding, 'height' : height + padding, 'meta' : meta});
+          // 确保小图的位置一定为偶数，以确保CSS的retina元素的background-position为整数
+          var _width = Math.round((width + padding)/2)*2;
+          var _height = Math.round((height + padding)/2)*2;
+          layer.addItem({'width' : _width, 'height' : _height, 'meta' : meta});
         });
 
         cb(null);
