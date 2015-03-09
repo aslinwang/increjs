@@ -289,8 +289,8 @@ var build = (function(){
           });
           var v2 = incre.gear._.clone(v);
           incre.fs.copyFiles(v, uploadDir, [
-            { regexp : '@', replacement : '-'},
-            { regexp : '.png', replacement : '_'+ver+'.png'}
+            { match : '@', replacement : '-'},
+            { match : '.png', replacement : '_'+ver+'.png'}
           ]).done(function(v1){
             console.log('  Info : write css sprite images success.');
 

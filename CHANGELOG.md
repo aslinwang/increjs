@@ -1,5 +1,8 @@
 change log
 ============
+9 March. 2015
+ * 增加upload-local引擎，允许将文件发布到本地，用于页面和前端文件公用域名和服务器的情况
+
 1 Jan. 2015
  * 确保小图的位置一定为偶数，以确保CSS的retina元素的background-position为整数
 
