@@ -260,7 +260,8 @@ var build = (function(){
   
   function cssprite(file, imgcss, success, fail){
     var uploadDir = incre.config.base + '.incre/upload/';
-    if(!incre.config.cssprite || !incre.config.cssprite.root){//@todo 如果有上次储存的图片版本号，则持续向下执行
+    // if(!incre.config.cssprite || !incre.config.cssprite.root){//@todo 如果有上次储存的图片版本号，则持续向下执行
+    if(!incre.config.cssprite){//@todo 如果有上次储存的图片版本号，则持续向下执行  
       if(fail){
         fail();
       }
@@ -268,9 +269,13 @@ var build = (function(){
     }
     if(incre.config.cssprite.root){
       incre.CONFIG.cssprite_root = incre.config.cssprite.root;
-      delete incre.config.cssprite.root;
+      // delete incre.config.cssprite.root;
     }
-    incre.gear._.each(incre.config.cssprite, function(v, k){
+
+    var k = path.basename(file);
+    var v = incre.config.cssprite[k];
+
+    function action(){
       if(incre.CONFIG.cssprite_root + k == file){
         //上传css图片，并修改版本号。考虑异步调用对后面写文件操作的影响
         //1、将图片复制到上传目录中
@@ -283,7 +288,7 @@ var build = (function(){
           vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
         });
 
-        if(imgcss){
+        if(imgcss == k){
           v = incre.gear._.map(f, function(i){
             return incre.CONFIG.cssprite_root + i;
           });
@@ -321,12 +326,22 @@ var build = (function(){
         }
         else{
           if(success){
-            //console.log(vers);
             success(vers);
           }
         }
       }
+    }
+
+    action();
+  }
+
+  // 将import文件替换为实际代码
+  function importcss(data){
+    data = data.replace(/@import\s+url\(['"]?([\d\w\._-]*).*\);/g, function(match, group, str){
+      console.log(group);
+      return fs.readFileSync(incre.config.gaga.root + group);
     });
+    return data;
   }
 
   function gendist(cfg){
@@ -415,7 +430,24 @@ var build = (function(){
 
     merge().done(function(mergeCodes){
       //build js/css
-      incre.gear._.each(incre.config.src, function(v, k){//@todo 这里each(同步)和readFile(异步)之间可能有问题
+      var keys = [];
+      for(var k in incre.config.src){
+        keys.push(k);
+      }
+
+      function action1(){
+        var k = keys.shift();
+
+        if(!k){
+          //build template
+          if(Template.isenable()){
+            Template.build();
+          }
+          return;
+        }
+
+        var v = incre.config.src[k];
+
         var newfile = incre.config.base + k;
         (function(newfile, v, k){
           incre.fs.readFile(newfile, true).done(function(data){
@@ -426,6 +458,7 @@ var build = (function(){
                 newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
               }
               else if(newfile.indexOf('.css') != -1){
+                data = importcss(data);
                 newcode = new cleancss({
                   noAdvanced : true
                 }).minify(data);
@@ -475,21 +508,20 @@ var build = (function(){
                 });
                 cfg.newcode = newcode;
                 gendist(cfg);
+                action1();
               }, function(){
                 gendist(cfg);
+                action1();
               });
             }
             else{
               gendist(cfg);
+              action1();
             }
           });
         }(newfile, v, k));
-      });
-
-      //build template
-      if(Template.isenable()){
-        Template.build();
       }
+      action1();
     });
 
     console.log('  Info : start building js, css and template'.green);

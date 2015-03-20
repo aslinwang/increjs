@@ -246,7 +246,7 @@ var GaGa = (function(){
     return res;
   }
 
-  function createSprite(css){
+  function createSprite(css, done){
     var config = incre.config.gaga.engine || {};
     var imgList = slices;
     var imgList2x = slices2x;
@@ -396,7 +396,9 @@ var GaGa = (function(){
           });
         }
       ], function(){
-        
+        if(done){
+          done();
+        }
       });
     }
   }
@@ -412,26 +414,37 @@ var GaGa = (function(){
     sliceDir = incre.config.gaga.slice;
     src = incre.config.gaga.src;
 
-    incre.gear._.each(src, function(v, k){
-      var file = root + v;
-      incre.fs.readFile(file).done(function(data){
-        data = data.replace(/background-image\s*:\s*url\((.*)\)/g, function(match,group,str){
-          var img = group.replace(/\'/g, '').replace(/\"/g, '');
-          if(img.indexOf('slice') != -1){
-            slices.push(path.basename(img));
-            slices2x.push(path.basename(img).replace('.png', '@2x.png'));
-          }
-          return match;
+    function action(){
+      var css = src.shift();
+      var file = '';
+      if(css){
+        slices = [];
+        slices2x = [];
+        file = root + css;
+
+        incre.fs.readFile(file).done(function(data){
+          data = data.replace(/background-image\s*:\s*url\((.*)\)/g, function(match,group,str){
+            var img = group.replace(/\'/g, '').replace(/\"/g, '');
+            if(img.indexOf('slice') != -1){
+              slices.push(path.basename(img));
+              slices2x.push(path.basename(img).replace('.png', '@2x.png'));
+            }
+            return match;
+          });
+
+          codes = data;
+
+          slices = incre.gear._.uniq(slices);//数组去重
+          slices2x = incre.gear._.uniq(slices2x);//数组去重
+          
+          createSprite(css, function(){
+            action();
+          });
         });
+      }
+    }
 
-        codes = data;
-
-        slices = incre.gear._.uniq(slices);//数组去重
-        slices2x = incre.gear._.uniq(slices2x);//数组去重
-        
-        createSprite(v);
-      });
-    });
+    action();
 
     // 1、获取css文件中的background-image图片
     // 2、从incre.config.slice目录中获取1中图片

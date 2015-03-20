@@ -1,5 +1,9 @@
 change log
 ============
+20 March. 2015
+ * 支持css文件中的import模式，打包时会自动寻找import语句，并替换成实际代码（import文件中暂不支持自动css sprite）
+ * 支持一个工程中配置多个css文件
+
 9 March. 2015
  * 增加upload-local引擎，允许将文件发布到本地，用于页面和前端文件公用域名和服务器的情况
 
