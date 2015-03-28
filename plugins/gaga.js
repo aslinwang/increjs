@@ -401,6 +401,23 @@ var GaGa = (function(){
         }
       });
     }
+    else{
+      async.waterfall([
+        function saveCss(){
+          console.log(('  Info : start write ' + css + '...(without gaga)').green);
+          fs.writeFile(dist + css, codes, function(err){
+            if(err){
+              console.log(('  Error:' + err).red);
+            }
+            console.log(('  Info : write ' + css + 'success (without gaga)').green);
+          });
+        }
+      ], function(){
+        if(done){
+          done();
+        }
+      });
+    }
   }
 
   function build(){

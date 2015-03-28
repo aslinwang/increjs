@@ -194,10 +194,10 @@ var Template = (function(){
           }
           incre.fs.writeFile(file, code, function(err){
             if(err){
-              console.log(('  Error : write tmplate file ' + file + 'failed!').red);
+              console.log(('  Error : write tmplate file ' + file + ' failed!').red);
             }
             else{
-              console.log('  Info : write tmplate file ' + file + ' success.');
+              console.log(('  Info : write tmplate file ' + file + ' success.').green);
             }
           }, incre.config.base);
 
@@ -274,6 +274,13 @@ var build = (function(){
 
     var k = path.basename(file);
     var v = incre.config.cssprite[k];
+
+    if(!v){//未配置cssprite
+      if(fail){
+        fail();
+      }
+      return;
+    }
 
     function action(){
       if(incre.CONFIG.cssprite_root + k == file){
@@ -359,7 +366,7 @@ var build = (function(){
         console.log(('  Error : write file ' + tmpfile + ' failed!').red);
       }
       else{
-        console.log('  Info : write file ' + tmpfile + ' success.');
+        console.log(('  Info : write file ' + tmpfile + ' success.').green);
       }
     });
 

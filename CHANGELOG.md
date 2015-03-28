@@ -1,5 +1,8 @@
 change log
 ============
+28 March. 2015
+ * 修复在没有配置cssprite时，报错的问题
+
 20 March. 2015
  * 支持css文件中的import模式，打包时会自动寻找import语句，并替换成实际代码（import文件中暂不支持自动css sprite）
  * 支持一个工程中配置多个css文件
