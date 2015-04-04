@@ -1,13 +1,16 @@
 change log
 ============
-28 March. 2015
+4 Apr. 2015
+ * 将cssprite过程从increjs移到gaga中，这样模块可以高内聚，同时可以优化increfile配置
+
+28 Mar. 2015
  * 修复在没有配置cssprite时，报错的问题
 
-20 March. 2015
+20 Mar. 2015
  * 支持css文件中的import模式，打包时会自动寻找import语句，并替换成实际代码（import文件中暂不支持自动css sprite）
  * 支持一个工程中配置多个css文件
 
-9 March. 2015
+9 Mar. 2015
  * 增加upload-local引擎，允许将文件发布到本地，用于页面和前端文件公用域名和服务器的情况
 
 1 Jan. 2015

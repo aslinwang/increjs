@@ -33,17 +33,11 @@ module.exports = {
     // },
     // 'root' : 'mobi/css/',//样式根目录
     // 'slice' : 'img/slice/',//切片图目录root+slice
-    // 'src' : [
-    //   'main.css'
-    // ]
-  },
-  cssprite : {//css sprite图片配置,配合cssgaga使用
-    // 'root' : '.incre/gaga/',
-    // 'cdnpath_prefix' : 'css/',//腾讯CMS专用
-    // 'cdnpath' : 'mobi/sprite/',
-    // 'main.css' : {
-    //   'main.png' : '141113',//样式中雪碧图及其版本号
-    //   'main@2x.png' : '141113'
+    // 'src' : {
+    //   'main.css' : {
+    //     'main.png' : '150404',
+    //     'main@2x.png' : '150404'
+    //   }
     // }
   },
   src : {//需要build的文件对象(文件名:cdn上全量文件版本号)

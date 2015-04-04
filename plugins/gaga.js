@@ -225,6 +225,8 @@ var GaGa = (function(){
   var coordinates = {};//坐标存储
   var codes = '';//存储样式代码
 
+  var spriteDir = '.incre/gaga/';//sprite生成目录
+
   var options = {
     imagestamp : false,
     cssstamp : false,
@@ -409,7 +411,7 @@ var GaGa = (function(){
             if(err){
               console.log(('  Error:' + err).red);
             }
-            console.log(('  Info : write ' + css + 'success (without gaga)').green);
+            console.log(('  Info : write ' + css + ' success (without gaga)').green);
           });
         }
       ], function(){
@@ -425,11 +427,15 @@ var GaGa = (function(){
       console.log('  Warning : has no gaga config!'.yellow);
       return;
     }
-    dist = incre.config.base + '.incre/gaga/';
+    dist = incre.config.base + spriteDir;
     incre.fs.mkdir('gaga', incre.config.base + '.incre');//创建存放gaga编译文件的目录
     root = incre.config.gaga.root;
     sliceDir = incre.config.gaga.slice;
-    src = incre.config.gaga.src;
+    src = [];
+
+    for(var key in incre.config.gaga.src){
+      src.push(key);
+    }
 
     function action(){
       var css = src.shift();
@@ -479,13 +485,103 @@ var GaGa = (function(){
 
   }
 
+  // 上传雪碧图，并追加retina代码
+  // cfg.fpMap filepathMap
+  // cfg.ver 版本号
+  function cssprite(file, imgcss, success, fail, cfg){
+    var uploadDir = incre.config.base + '.incre/upload/';
+    // if(!incre.config.cssprite || !incre.config.cssprite.root){//@todo 如果有上次储存的图片版本号，则持续向下执行
+    // if(!incre.config.cssprite){//@todo 如果有上次储存的图片版本号，则持续向下执行  
+    //   if(fail){
+    //     fail();
+    //   }
+    //   return;
+    // }
+    incre.CONFIG.cssprite_root = spriteDir;
+
+    var k = path.basename(file);
+    var v = incre.config.gaga.src[k];
+
+    if(!v){//未配置cssprite
+      if(fail){
+        fail();
+      }
+      return;
+    }
+
+    function action(){
+      if(incre.CONFIG.cssprite_root + k == file){
+        //上传css图片，并修改版本号。考虑异步调用对后面写文件操作的影响
+        //1、将图片复制到上传目录中
+        //2、获取图片的索引
+        //3、上传图片
+        var vers = {};//版本号对象,basename
+        var f = [];//图片文件列表
+        incre.gear._.each(v, function(_ver, _f){
+          f.push(_f);
+          vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
+        });
+
+        if(imgcss == k){
+          v = incre.gear._.map(f, function(i){
+            return incre.CONFIG.cssprite_root + i;
+          });
+          var v2 = incre.gear._.clone(v);
+          incre.fs.copyFiles(v, uploadDir, [
+            { match : '@', replacement : '-'},
+            { match : '.png', replacement : '_'+cfg.ver+'.png'}
+          ]).done(function(v1){
+            console.log('  Info : write css sprite images success.');
+
+            var filePathMap = {};
+            incre.gear._.each(v2, function(value, key){
+              value = path.basename(value.replace('@', '-'));
+              filePathMap[value] = incre.config.upload.project + '/sprite/';
+            });
+
+            v1 = incre.gear._.map(v1, function(i){
+              return incre.uploader.indexOf(i, uploadDir);
+            });
+
+            incre.uploader.uploadDir(uploadDir, v1, incre.gear._.extend(incre.config, {
+              cdnpath : incre.config.upload.cdnpath,
+              cdncsspath : incre.config.upload.cdncsspath,
+              pathmap : incre.config.pathmap,
+              filePathMap : incre.gear._.extend(filePathMap, cfg.fpMap),
+              cdn : incre.config.upload.cdncssimgpath
+            }), function(verObj){
+              console.log('  Info : upload css sprite images success.'.green);
+
+              if(success){
+                success(verObj);
+              }
+            });
+          });
+        }
+        else{
+          if(success){
+            success(vers);
+          }
+        }
+      }
+    }
+
+    action();
+  }
+
   return {
-    build : build
+    build : build,
+    cssprite : cssprite
   }
 }());
 
+exports.cssprite = function(file, imgcss, success, fail, cfg){
+  GaGa.cssprite(file, imgcss, success, fail, cfg);
+}
+
 exports.init = function(_incre){
   incre = _incre;
+  incre.CONFIG = incre.CONFIG || {};
   incre.commander.command({
     cmd : 'gaga',//incre gaga
     description : 'precompile css like cssgaga',
