@@ -1,5 +1,8 @@
 change log
 ============
+19 Apr. 2015
+ * 新增`incre qzmin`命令
+
 4 Apr. 2015
  * 将cssprite过程从increjs移到gaga中，这样模块可以高内聚，同时可以优化increfile配置
 

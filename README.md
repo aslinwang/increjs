@@ -19,6 +19,7 @@ Usage
 * `incre upload` - 上传文件到CDN
 * `incre markdown` - 将markdown文件转化成html文件
 * `incre html` - 构建html页面
+* `incre qzmin` - 根据increfile.js的[merge]配置，生成qzmin文件
 
 ### `incre init`
 
@@ -117,6 +118,10 @@ html : {//build html 专为重构工作设计
 ### `incre clear`
 
 命令行执行，清除`.incre`目录下的临时文件
+
+### `incre qzmin`
+
+命令行执行，根据increfile.js的[merge]配置生成qzmin文件，此文件配合Fiddler+willow使用，可以将一个js请求拆分成多个子文件的请求，从而映射到本地的相应文件
 
 Change Log
 ----------
