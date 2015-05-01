@@ -10,8 +10,11 @@ Install
     [下载安装](https://github.com/aslinwang/increjs/tree/master/misc)
   * Mac版本
     使用brew进行安装
+
     `brew install imagemagick`
+
     `brew install graphicsmagick`
+
     注意：如果在mac下使用incre，需要在`increfile.js`配置文件中设置`gaga.engine.imageMagick=true`
 * `npm install increjs -g`
 
