@@ -5,7 +5,14 @@ increjs
 
 Install
 -------
-* 安装图形处理库[GraphicsMagick](https://github.com/aslinwang/increjs/tree/master/misc)(如果需要用到`incre gaga`)
+* 安装图形处理库GraphicsMagick(如果需要用到`incre gaga`)
+  * Windows版本
+    [下载安装](https://github.com/aslinwang/increjs/tree/master/misc)
+  * Mac版本
+    使用brew进行安装
+    `brew install imagemagick`
+    `brew install graphicsmagick`
+    注意：如果在mac下使用incre，需要在`increfile.js`配置文件中设置`gaga.engine.imageMagick=true`
 * `npm install increjs -g`
 
 Usage

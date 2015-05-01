@@ -102,7 +102,7 @@ var Spritesmith = (function(){
 
     try{
       engine = require('gmsmith');
-      gm = require('gm');
+      gm = require('gm').subClass({imageMagick : params.imageMagick});
     }catch(e){
       console.log('  Error : has no gmsmith engine! Please install GraphicsMagick lib and reinstall increjs! https://github.com/aslinwang/increjs/issues/3'.red);
       return;
@@ -317,10 +317,14 @@ var GaGa = (function(){
                   if(err){
                     console.log(('  Error:' + err).red);
                   }
+
                   Spritesmith.gm()(dist_sprite2x).size(function(err, size){
                     if(!err){
                       retinaSize = size;
                       cb(null);
+                    }
+                    else{
+                      console.log(('  Error:' + err).red);
                     }
                   });
                 });
@@ -339,7 +343,7 @@ var GaGa = (function(){
               var imgKey = prefix + img;
               var imgV = coordinates.sprite[imgKey];
 
-              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', imgV.x, 'px -', imgV.y, 'px;'].join('');
+              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', imgV.x, 'px -', imgV.y, 'px;', 'background-size: inherit;'].join('');
             }
             return match;
           });

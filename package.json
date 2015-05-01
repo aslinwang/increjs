@@ -1,6 +1,6 @@
 ﻿{
   "name": "increjs",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
@@ -11,14 +11,16 @@
     "cmd-interface": "0.0.5",
     "jsmin2": "~1.1.7",
     "clean-css": "~2.2.13",
-    "uglify-js": "~2.4.15",
+    "uglify-js": "~2.4.20",
     "colors": "~0.6.2",
     "request": "~2.38.0",
-    "gearjs": "~0.0.6",
+    "gearjs": "~0.0.7",
     "chokidar": "~0.8.4",
     "iconv-lite": "~0.4.4",
     "async": "~0.2.6",
-    "layout": "~2.0.0"
+    "layout": "~2.0.0",
+    "express": "3.4.0",
+    "requirejs": "*"
   },
   "devDependencies": {
     "mocha": "*",

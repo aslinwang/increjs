@@ -1,5 +1,11 @@
 change log
 ============
+1 May 2015
+ * 新增初始化项目时，nproxy配置文件
+ * 使用requirejs编写模块，支持使用rjs打包
+ * js压缩配置新增"~"，支持对js文件原样输出
+ * css sprite支持背景图使用2倍图（需要在css样式规则中将`background-size:12px 12px;`写在当条规则的最前面）
+
 19 Apr. 2015
  * 新增`incre qzmin`命令
 

@@ -6,7 +6,9 @@ var cleancss = require('clean-css');
 var jsmin = require('jsmin2');
 var jsugly = require('uglify-js');
 var colors = require('colors');
+var requirejs = require('requirejs');
 var projConf = require('../package.json');
+var cp = require('child_process');
 
 //colors
 //bold italic underline inverse 
@@ -41,6 +43,19 @@ function initConfig(){
     flags : 'w',
     encoding : 'utf-8',
     mode : '755'
+  });
+
+  var npfile = './.incre/nproxy.js';
+  var npTmpl = [
+    'module.exports = [\n',
+      '\t// nproxy配置文件，详情请看https://github.com/goddyZhao/nproxy\n',
+      '\t\n',
+    '];'
+  ].join('');
+  fs.writeFile(npfile, npTmpl, function(err){
+    if(err){
+      console.log(('  Error : ' + err).red);
+    }
   });
 }
 
@@ -134,6 +149,7 @@ function merge(){
   var defer = incre.gear.q.defer();
 
   var keys = incre.gear._.keys(incre.config.merge);
+
   function get(){
     var key = keys.shift();
     if(!key){
@@ -257,90 +273,11 @@ var Template = (function(){
 var build = (function(){
   var d = new Date();
   var ver = d.getFullYear().toString().slice(2) + addZero(d.getMonth() + 1) + addZero(d.getDate());
-  
-  // function cssprite(file, imgcss, success, fail){
-  //   var uploadDir = incre.config.base + '.incre/upload/';
-  //   // if(!incre.config.cssprite || !incre.config.cssprite.root){//@todo 如果有上次储存的图片版本号，则持续向下执行
-  //   if(!incre.config.cssprite){//@todo 如果有上次储存的图片版本号，则持续向下执行  
-  //     if(fail){
-  //       fail();
-  //     }
-  //     return;
-  //   }
-  //   if(incre.config.cssprite.root){
-  //     incre.CONFIG.cssprite_root = incre.config.cssprite.root;
-  //     // delete incre.config.cssprite.root;
-  //   }
-
-  //   var k = path.basename(file);
-  //   var v = incre.config.cssprite[k];
-
-  //   if(!v){//未配置cssprite
-  //     if(fail){
-  //       fail();
-  //     }
-  //     return;
-  //   }
-
-  //   function action(){
-  //     if(incre.CONFIG.cssprite_root + k == file){
-  //       //上传css图片，并修改版本号。考虑异步调用对后面写文件操作的影响
-  //       //1、将图片复制到上传目录中
-  //       //2、获取图片的索引
-  //       //3、上传图片
-  //       var vers = {};//版本号对象,basename
-  //       var f = [];//图片文件列表
-  //       incre.gear._.each(v, function(_ver, _f){
-  //         f.push(_f);
-  //         vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
-  //       });
-
-  //       if(imgcss == k){
-  //         v = incre.gear._.map(f, function(i){
-  //           return incre.CONFIG.cssprite_root + i;
-  //         });
-  //         var v2 = incre.gear._.clone(v);
-  //         incre.fs.copyFiles(v, uploadDir, [
-  //           { match : '@', replacement : '-'},
-  //           { match : '.png', replacement : '_'+ver+'.png'}
-  //         ]).done(function(v1){
-  //           console.log('  Info : write css sprite images success.');
-
-  //           var filePathMap = {};
-  //           incre.gear._.each(v2, function(value, key){
-  //             value = path.basename(value.replace('@', '-'));
-  //             filePathMap[value] = incre.config.upload.project + '/sprite/';
-  //           });
-
-  //           v1 = incre.gear._.map(v1, function(i){
-  //             return incre.uploader.indexOf(i, uploadDir);
-  //           });
-
-  //           incre.uploader.uploadDir(uploadDir, v1, incre.gear._.extend(incre.config, {
-  //             cdnpath : incre.config.upload.cdnpath,
-  //             cdncsspath : incre.config.upload.cdncsspath,
-  //             pathmap : incre.config.pathmap,
-  //             filePathMap : incre.gear._.extend(filePathMap, getFilePathMap()),
-  //             cdn : incre.config.upload.cdncssimgpath
-  //           }), function(verObj){
-  //             console.log('  Info : upload css sprite images success.'.green);
-
-  //             if(success){
-  //               success(verObj);
-  //             }
-  //           });
-  //         });
-  //       }
-  //       else{
-  //         if(success){
-  //           success(vers);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   action();
-  // }
+  var CONST_VERS = {
+    NOINCRE : '',//不生成增量文件
+    NOVER : '-',//不进行版本控制，上传时覆盖老的文件
+    NOMIN : '~'//不进行js混淆压缩
+  }
 
   // 将import文件替换为实际代码
   function importcss(data){
@@ -369,7 +306,7 @@ var build = (function(){
       }
     });
 
-    if(v.trim() != '' && v.trim() != '-'){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
+    if([CONST_VERS.NOINCRE, CONST_VERS.NOVER, CONST_VERS.NOMIN].indexOf(v.trim()) == -1){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
       //计算增量文件
       var cdnfile = incre.config.upload.cdnpath + k.replace('.js', '_' + v + '.js');
       var jsKey = k.replace('.js', '');
@@ -445,6 +382,11 @@ var build = (function(){
         var k = keys.shift();
 
         if(!k){
+          if(incre.config.rjs){
+            requirejs.optimize(incre.config.rjs, function(res){
+              console.log(res);
+            });
+          }
           //build template
           if(Template.isenable()){
             Template.build();
@@ -457,9 +399,9 @@ var build = (function(){
         var newfile = incre.config.base + k;
         (function(newfile, v, k){
           incre.fs.readFile(newfile, true).done(function(data){
-            var newcode = '';
+            var newcode = data;
             if(data && !mergeCodes[k]){//区分js和css && 非合并文件
-              if(newfile.indexOf('.js') != -1){
+              if(newfile.indexOf('.js') != -1 && v != CONST_VERS.NOMIN){//版本号为“～”的文件不进行混淆压缩
                 newcode = jsmin(data).code;//jsmin
                 newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
               }
@@ -671,6 +613,18 @@ incre.commander.command({
 incre.commander.version(projConf.version);
 
 var configfile = checkConfig();
+
+if(process.argv[process.argv.length - 1] == '-d'){//debug mode
+  var oldspawn = cp.spawn;
+  var mySpawn = function(){
+    console.log('spawn called');
+    console.log(arguments);
+    var result = oldspawn.apply(this, arguments);
+    return result;
+  }
+  cp.spawn = mySpawn;
+}
+
 if(!process.argv[2]){//incre help
   incre.commander.run(['-h']);
 }

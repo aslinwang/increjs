@@ -26,10 +26,26 @@ module.exports = {
     //     'mobi/auto.js'
     // ]
   },
+  rjs : {//r.js配置文件，详情用法参考http://requirejs.org/docs/optimization.html
+    baseUrl : './',
+    dir : 'dist',
+    fileExclusionRegExp : /^(\.incre|html)$/,
+    paths: {
+      // avalon : 'vendor/avalon/avalon.mobile.min',
+      // domReady : 'vendor/require/domReady',
+      // text : 'vendor/require/text',
+      // zepto: 'vendor/zepto/zepto-1.1.4'
+    },
+    modules : [
+      // {name : 'main'}
+      // {name : 'modules/aaa/aaa'}
+    ]
+  },
   gaga : {
     // 'engine' : {//gm engine config
     //   'algorithm' : 'binary-tree',
-    //   'padding' : 4
+    //   'padding' : 4,
+    //   'imageMagick' : false //如果是需要在Mac下使用，需要将此属性置为true
     // },
     // 'root' : 'mobi/css/',//样式根目录
     // 'slice' : 'img/slice/',//切片图目录root+slice
