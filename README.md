@@ -23,6 +23,7 @@ Usage
 -----
 命令包括：
 * `incre` - 使用帮助
+* `incre -d` - 在调试模式下运行命令
 * `incre -v` - 查看increjs的版本号
 * `incre init` - 项目初始化
 * `incre gaga` - 处理css sprite图片
