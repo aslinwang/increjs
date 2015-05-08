@@ -60,6 +60,7 @@ module.exports = {
     // 'm/t/page.js' : 140717,//path+filename,文件filename最终会上传至cdnpath+path下
     // 'noincre.js' : '',//value为空 ：不生成增量文件
     // 'noversion' : '-'//value为"-" : 不追加版本号，上传的时候可能会覆盖原文件、慎用！
+    // 'nojsmin' : '~',//value为"~" : 对js文件不做处理，一般对无法使用jsugly压缩的js文件作此处理
     // 'mobi/core.js' : '',//js文件构建
     // 'mobi/css/test.css' : ''//css文件构建
   },
