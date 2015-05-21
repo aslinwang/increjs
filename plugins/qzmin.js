@@ -37,8 +37,8 @@ var QzMin = (function(){
     qzDir = incre.config.base + '.incre/qzmin/';
     tmpl = incre.gear._.template(tmpl);
 
-    incre.fs.mkdir('qzmin', incre.config.base + '.incre');//创建存放gaga编译文件的目录
-    incre.fs.mkdir('out', incre.config.base + '.incre/qzmin');//创建存放gaga编译文件的目录
+    incre.fs.mkdir('qzmin', incre.config.base + '.incre/');//创建存放gaga编译文件的目录
+    incre.fs.mkdir('out', incre.config.base + '.incre/qzmin/');//创建存放gaga编译文件的目录
 
     var src = [];
     for(var key in incre.config.merge){

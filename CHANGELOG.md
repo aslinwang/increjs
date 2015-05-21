@@ -1,5 +1,9 @@
 change log
 ============
+21 May 2015
+ * `incre upload -l`展示路径信息
+ * mkdir循环创建目录更改逻辑时候，老的创建目录的方式有误,修复此bug
+
 1 May 2015
  * 新增初始化项目时，nproxy配置文件
  * 使用requirejs编写模块，支持使用rjs打包

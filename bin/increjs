@@ -32,9 +32,9 @@ var configfile;
 function initConfig(){
   var base = './';
   incre.fs.mkdir('.incre', base);
-  incre.fs.mkdir('upload', base + '.incre');//待上传的文件临时目录
-  incre.fs.mkdir('tmpl', base + '.incre');//存放模板的目录
-  incre.fs.mkdir('md2html', base + '.incre');//markdown文件转成html文件之后，存放的目录
+  incre.fs.mkdir('upload', base + '.incre/');//待上传的文件临时目录
+  incre.fs.mkdir('tmpl', base + '.incre/');//存放模板的目录
+  incre.fs.mkdir('md2html', base + '.incre/');//markdown文件转成html文件之后，存放的目录
 
   var file = 'increfile.js';
   var defaultConfig = fs.createReadStream(path.join(incre.root, 'sample/'+file));
@@ -493,7 +493,9 @@ function upload(opt){
   }
   var uploadDir = incre.config.base + '.incre/upload/';
   if(opt == -1){//查看上传列表
-    incre.uploader.listDir(uploadDir);
+    incre.uploader.listDir(uploadDir, {
+      filePathMap : getFilePathMap()
+    });
   }
   else{
     console.log('  Info : start uploading'.green);

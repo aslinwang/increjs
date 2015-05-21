@@ -432,7 +432,7 @@ var GaGa = (function(){
       return;
     }
     dist = incre.config.base + spriteDir;
-    incre.fs.mkdir('gaga', incre.config.base + '.incre');//创建存放gaga编译文件的目录
+    incre.fs.mkdir('gaga', incre.config.base + '.incre/');//创建存放gaga编译文件的目录
     root = incre.config.gaga.root;
     sliceDir = incre.config.gaga.slice;
     src = [];
