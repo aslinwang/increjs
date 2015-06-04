@@ -27,6 +27,7 @@ module.exports = {
     // ]
   },
   rjs : {//r.js配置文件，详情用法参考http://requirejs.org/docs/optimization.html
+    enable : false,
     baseUrl : './',
     dir : 'dist',
     fileExclusionRegExp : /^(\.incre|html)$/,

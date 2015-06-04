@@ -28,6 +28,7 @@ var cp = require('child_process');
 //build模版时，需要处理模版依赖的样式文件（为单独文件，不写在模板html中）
 var incre = module.exports = require('../index.js');
 var configfile;
+var dupliMap = {};
 
 function initConfig(){
   var base = './';
@@ -76,6 +77,7 @@ function checkConfig(){
 function getFilePathMap(){
   var filePathMap = {};
   incre.gear._.each(incre.config.src, function(v, k){
+    k = duplicate1(k);
     var fileInfo = k.split('/');
     var fileName = fileInfo[fileInfo.length - 1];
     var filePath = k.replace(fileName, '');
@@ -85,6 +87,43 @@ function getFilePathMap(){
     filePathMap[fileName] = filePath;
   });
   return filePathMap;
+}
+
+// 对重复文件名做处理（copy to upload dir）
+// tar - 目标文件路径
+function duplicate(tar){
+  var newname = tar;
+  if(!dupliMap[newname]){
+    dupliMap[newname] = 1;
+  }
+  else{
+    var ext = path.extname(tar);
+    var base = tar.replace(ext, '');
+    newname = base + '_' + dupliMap[newname] + ext;
+    dupliMap[tar]++;
+  }
+  return newname;
+}
+
+// 对重复文件名做处理（getFilePathMap）
+function duplicate1(src){
+  var newsrc = src;
+  var ext = path.extname(src);
+  var fileInfo = src.split('/');
+  var fileName = fileInfo[fileInfo.length - 1];
+  var srcPath = src.replace(fileName, '');
+  var basename = path.basename(src).replace(ext, '');
+
+  src = fileName;
+
+  if(!dupliMap[src]){
+    dupliMap[src] = 1;
+  }
+  else{
+    newsrc = srcPath + basename + '_' + dupliMap[src] + ext;
+    dupliMap[src]++;
+  }
+  return newsrc;
 }
 
 function addZero(v){
@@ -297,6 +336,7 @@ var build = (function(){
         uploadDir = cfg.uploadDir,
         logInfo = cfg.logInfo;
 
+    tmpfile = duplicate(tmpfile, k);
     fs.writeFile(tmpfile, newcode, function(err){
       if(err){
         console.log(('  Error : write file ' + tmpfile + ' failed!').red);
@@ -362,6 +402,15 @@ var build = (function(){
     return res;
   }
 
+  function jscompile(data, opt){
+    var code = jsmin(data).code;// jsmin
+    code = jsugly.minify(code, opt).code;// jsugly
+
+    // cp.exec()
+
+    return code;
+  }
+
   return function(imgcss){
     var uploadDir = incre.config.base + '.incre/upload/';
     var logInfo = incre.gear.listen.add({}, function(logs){
@@ -382,7 +431,7 @@ var build = (function(){
         var k = keys.shift();
 
         if(!k){
-          if(incre.config.rjs){
+          if(incre.config.rjs && incre.config.rjs.enable){
             requirejs.optimize(incre.config.rjs, function(res){
               console.log(res);
             });
@@ -402,8 +451,7 @@ var build = (function(){
             var newcode = data;
             if(data && !mergeCodes[k]){//区分js和css && 非合并文件
               if(newfile.indexOf('.js') != -1 && v != CONST_VERS.NOMIN){//版本号为“～”的文件不进行混淆压缩
-                newcode = jsmin(data).code;//jsmin
-                newcode = jsugly.minify(newcode, incre.gear._.extend({fromString:true}, incre.config.jsugly || {})).code;//jsugly
+                newcode = jscompile(data, incre.gear._.extend({fromString:true}, incre.config.jsugly || {}));
               }
               else if(newfile.indexOf('.css') != -1){
                 data = importcss(data);
@@ -415,8 +463,7 @@ var build = (function(){
             else{
               if(mergeCodes[k] && mergeCodes[k].length > 0){//合并文件
                 newcode = mergeCodes[k].join('\n');
-                newcode = jsmin(newcode).code;//jsmin
-                newcode = jsugly.minify(newcode, {fromString:true}).code;//jsugly
+                newcode = jscompile(newcode, {fromString:true});
               }
             }
             

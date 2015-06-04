@@ -135,6 +135,11 @@ html : {//build html 专为重构工作设计
 
 命令行执行，根据increfile.js的[merge]配置生成qzmin文件，此文件配合Fiddler+willow使用，可以将一个js请求拆分成多个子文件的请求，从而映射到本地的相应文件
 
+Attention
+----------
+* 文件命名规范：[a-zA-Z0-9\-].*
+* 不同目录下的文件可以重名，但是重名文件不能超过99个
+
 Change Log
 ----------
 [change log](CHANGELOG.md)
