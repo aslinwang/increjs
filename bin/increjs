@@ -499,7 +499,7 @@ var build = (function(){
                   incre.gear._.each(verObj, function(v1, k1){//cssgaga 不能再设置sprite新文件名
                     var regexp = new RegExp(k1.replace(/\./g, '\.'), 'g');
                     var ext = path.extname(k1);
-                    var replacement = [k1.replace(ext, ''), '_', v1, ext].join('');
+                    var replacement = [k1.replace(ext, ''), (v1 == CONST_VERS.NOVER ? '' : ('_' + v1)), ext].join('');// 如果没有版本控制，需要改变雪碧图文件名
                     newcode = newcode.replace(regexp, replacement);
                   });
                   cfg.newcode = newcode;
@@ -615,6 +615,9 @@ incre.commander.command({
       if(opt == '-l'){//incre upload -l - 查看待上传的文件
         upload(-1);
       }
+      else if(opt == '-c'){//incre upload -c 清空本地上传目录
+        incre.uploader.clear();
+      }
       else{//incre upload 1,2,3,4... or incre upload 0
         upload(opt);
       }
@@ -688,6 +691,9 @@ else{
     incre.config = require(path.join(configfile, 'increfile.js'));
     incre.config.upload = incre.config.upload || {};
     incre.CONFIG = {};//因为配置结构设计，将某些配置存在内存中
+
+    incre.uploader.init(incre);
+
     incre.commander.run();
   }
   else{//无配置

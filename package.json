@@ -1,6 +1,6 @@
 ﻿{
   "name": "increjs",
-  "version": "2.2.9",
+  "version": "2.2.10",
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
@@ -14,7 +14,7 @@
     "uglify-js": "~2.4.20",
     "colors": "~0.6.2",
     "request": "~2.38.0",
-    "gearjs": "~0.0.8",
+    "gearjs": "~0.0.9",
     "chokidar": "~0.8.4",
     "iconv-lite": "~0.4.4",
     "async": "~0.2.6",

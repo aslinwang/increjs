@@ -307,7 +307,7 @@ var GaGa = (function(){
                 console.log(('  Error:' + err).red);
               }
               else{
-                var dist_sprite2x = dist + css.replace('.css', '@2x.') + 'png';
+                var dist_sprite2x = dist + css.replace('.css', (incre.config.gaga.x2suffix ? incre.config.gaga.x2suffix : '@') + '2x.') + 'png';
                 coordinates.sprite2x = {};
                 incre.gear._.each(list, function(v,k){
                   coordinates.sprite2x[v] = result.coordinates[v];
@@ -531,10 +531,17 @@ var GaGa = (function(){
             return incre.CONFIG.cssprite_root + i;
           });
           var v2 = incre.gear._.clone(v);
-          incre.fs.copyFiles(v, uploadDir, [
-            { match : '@', replacement : '-'},
-            { match : '.png', replacement : '_'+cfg.ver+'.png'}
-          ]).done(function(v1){
+          incre.fs.copyFiles(v, uploadDir, function(cur){
+            var ver = '';
+            cur = cur.replace('@2x', '-2x');
+            if(vers[cur] != '-'){
+              ver = '_' + cfg.ver;
+            }
+            return [
+              { match : '@', replacement : '-'},
+              { match : '.png', replacement : ver + '.png'}
+            ]
+          }).done(function(v1){
             console.log('  Info : write css sprite images success.');
 
             var filePathMap = {};
