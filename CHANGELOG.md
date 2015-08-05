@@ -1,5 +1,8 @@
 change log
 ============
+5 Aug. 2015
+ * cleancss默认会去除样式中的IE hack，配置compatibility为true可阻止
+
 30 June 2015
  * css文件中sprite图片支持不追加版本号的配置
  * 本地上传支持样式文件和sprite图片

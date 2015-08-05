@@ -239,7 +239,8 @@ var Template = (function(){
           var code = '', file = '';
           if(val.indexOf('.css') != -1){//css文件
             code = ["define('css/", key, "','", new cleancss({
-              noAdvanced : true
+              noAdvanced : true,
+              compatibility : true
             }).minify(data) , "');"].join('');
             file = tmplDir + tmplKey + '/' + key + '.css.js';
           }
@@ -456,7 +457,8 @@ var build = (function(){
               else if(newfile.indexOf('.css') != -1){
                 data = importcss(data);
                 newcode = new cleancss({
-                  noAdvanced : true
+                  noAdvanced : true,
+                  compatibility : true
                 }).minify(data);
               }
             }

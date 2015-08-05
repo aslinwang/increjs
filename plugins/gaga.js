@@ -352,7 +352,8 @@ var GaGa = (function(){
         function retinaCode(code, cb){
           if(incre.config.retina_image){
             var minicodes = new cleancss({
-              noAdvanced : true
+              noAdvanced : true,
+              compatibility : true
             }).minify(codes);
             RegExp.escape = function (s) {
                 return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
