@@ -279,6 +279,7 @@ var GaGa = (function(){
               incre.gear._.each(imgList, function(v,k){
                 coordinates.sprite[v] = result.coordinates[v];
               });
+              coordinates.spriteSize = result.properties;
               
               fs.writeFile(dist_sprite, result.image, 'binary', function(err){
                 if(err){
@@ -312,6 +313,7 @@ var GaGa = (function(){
                 incre.gear._.each(list, function(v,k){
                   coordinates.sprite2x[v] = result.coordinates[v];
                 });
+                coordinates.sprite2xSize = result.properties;
 
                 fs.writeFile(dist_sprite2x, result.image, 'binary', function(err){
                   if(err){
@@ -342,8 +344,16 @@ var GaGa = (function(){
             if(img.indexOf('slice') != -1){
               var imgKey = prefix + img;
               var imgV = coordinates.sprite[imgKey];
+              var bgs = 'inherit';//background-size
 
-              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', imgV.x, 'px -', imgV.y, 'px;', 'background-size: inherit;'].join('');
+              // 只使用一套雪碧图，对低分辨率的设备也使用二倍图
+              if(incre.config.gaga.src[css].oneset){
+                imgV.x = imgV.x / 2;
+                imgV.y = imgV.y / 2;
+                bgs = [coordinates.spriteSize.width / 2, 'px',' ', coordinates.spriteSize.height / 2, 'px'].join('');
+              }
+
+              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', imgV.x, 'px -', imgV.y, 'px;', 'background-size: ', bgs , ';'].join('');
             }
             return match;
           });
@@ -523,8 +533,11 @@ var GaGa = (function(){
         var vers = {};//版本号对象,basename
         var f = [];//图片文件列表
         incre.gear._.each(v, function(_ver, _f){
-          f.push(_f);
-          vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
+          // oneset为“是否为雪碧图”的配置，并不是文件名
+          if(_f != 'oneset'){
+            f.push(_f);
+            vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
+          }
         });
 
         if(imgcss == k){
@@ -548,7 +561,7 @@ var GaGa = (function(){
             var filePathMap = {};
             incre.gear._.each(v2, function(value, key){
               value = path.basename(value.replace('@', '-'));
-              filePathMap[value] = incre.config.upload.project + '/sprite/';
+              filePathMap[value] = incre.config.upload.project + incre.config.gaga.sprite ? incre.config.gaga.sprite : '/sprite/';
             });
 
             v1 = incre.gear._.map(v1, function(i){

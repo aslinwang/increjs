@@ -1,5 +1,8 @@
 change log
 ============
+11 Aug. 2015
+ * 支持只使用一套雪碧图，即对低分辨率的设备也使用二倍图
+
 5 Aug. 2015
  * cleancss默认会去除样式中的IE hack，配置compatibility为true可阻止
 
