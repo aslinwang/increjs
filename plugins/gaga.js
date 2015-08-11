@@ -561,7 +561,7 @@ var GaGa = (function(){
             var filePathMap = {};
             incre.gear._.each(v2, function(value, key){
               value = path.basename(value.replace('@', '-'));
-              filePathMap[value] = incre.config.upload.project + incre.config.gaga.sprite ? incre.config.gaga.sprite : '/sprite/';
+              filePathMap[value] = incre.config.upload.project + (incre.config.gaga.sprite ? incre.config.gaga.sprite : '/sprite/');
             });
 
             v1 = incre.gear._.map(v1, function(i){
