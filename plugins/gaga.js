@@ -345,15 +345,16 @@ var GaGa = (function(){
               var imgKey = prefix + img;
               var imgV = coordinates.sprite[imgKey];
               var bgs = 'inherit';//background-size
+              var pos = {};
 
               // 只使用一套雪碧图，对低分辨率的设备也使用二倍图
               if(incre.config.gaga.src[css].oneset){
-                imgV.x = imgV.x / 2;
-                imgV.y = imgV.y / 2;
+                pos.x = imgV.x / 2;
+                pos.y = imgV.y / 2;
                 bgs = [coordinates.spriteSize.width / 2, 'px',' ', coordinates.spriteSize.height / 2, 'px'].join('');
               }
 
-              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', imgV.x, 'px -', imgV.y, 'px;', 'background-size: ', bgs , ';'].join('');
+              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', pos.x, 'px -', pos.y, 'px;', 'background-size: ', bgs , ';'].join('');
             }
             return match;
           });
