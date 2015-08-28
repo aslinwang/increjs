@@ -1,5 +1,8 @@
 change log
 ============
+28 Aug. 2015
+ * 两套雪碧图在gaga时bug
+
 14 Aug. 2015
  * css文件多次引入相同雪碧图时，background-position计算错误
 

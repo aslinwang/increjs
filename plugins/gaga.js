@@ -345,7 +345,10 @@ var GaGa = (function(){
               var imgKey = prefix + img;
               var imgV = coordinates.sprite[imgKey];
               var bgs = 'inherit';//background-size
-              var pos = {};
+              var pos = {
+                x : imgV.x,
+                y : imgV.y
+              };
 
               // 只使用一套雪碧图，对低分辨率的设备也使用二倍图
               if(incre.config.gaga.src[css].oneset){
