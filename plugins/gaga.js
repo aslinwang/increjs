@@ -570,8 +570,8 @@ var GaGa = (function(){
         var vers = {};//版本号对象,basename
         var f = [];//图片文件列表
         incre.gear._.each(v, function(_ver, _f){
-          // oneset为“是否为雪碧图”的配置，并不是文件名
-          if(_f != 'oneset'){
+          // 处理非文件名的配置
+          if(['oneset', 'rem'].indexOf(_f) == -1){
             f.push(_f);
             vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
           }
