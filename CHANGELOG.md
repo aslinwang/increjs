@@ -1,5 +1,9 @@
 change log
 ============
+2 Sept. 2015
+ * background-image 支持rem
+ * 废除retina_image配置
+
 28 Aug. 2015
  * 两套雪碧图在gaga时bug
 

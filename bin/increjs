@@ -489,13 +489,7 @@ var build = (function(){
 
             //如果是样式文件，在minify之后，再处理sprite图片
             if(newfile.indexOf('.css') != -1){
-              if(incre.config.retina_image){
-                newcode = newcode.replace(/@2x\.png/g, '-2x.png');//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
-                if(newcode.indexOf('-2x.png') != -1){
-                  console.log(('  Warning : file ' + newfile + ' has retina images! Turn their names to "*-2x.png"!').yellow);
-                }
-                cfg.newcode = newcode;
-              }
+              cfg.newcode = incre.gaga.replace2x(newcode, newfile);
               if(incre.gaga){
                 incre.gaga.cssprite(k, imgcss, function(verObj){
                   incre.gear._.each(verObj, function(v1, k1){//cssgaga 不能再设置sprite新文件名

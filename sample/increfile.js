@@ -1,7 +1,6 @@
 module.exports = {
   base : './',//项目根目录
   chunk : 20,//块大小
-  retina_image : false,//腾讯CMS专用(将autoRetina的图片文件名'@2x'改为'-2x')
   jsugly : {//jsugly option配置
     mangle : {//配置不被mangle的字符串
       except : ['define', 'require', 'exports', 'module']
@@ -54,6 +53,11 @@ module.exports = {
     //   'main.css' : {
     //     'main.png' : '150404',
     //     'main@2x.png' : '150404'
+    //   },
+    //   'style1.css' : {
+    //     'rem' : 100,//rem方案
+    //     'oneset' : true,//使用一套雪碧图
+    //     'style1.png' : '150404'
     //   }
     // }
   },

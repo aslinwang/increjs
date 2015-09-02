@@ -256,6 +256,8 @@ var GaGa = (function(){
     var prefix = incre.config.base + root;
     var retinaSize;
 
+    var rem = incre.config.gaga.src[css].rem;
+
     imgList = incre.gear._.map(imgList, function(img){
       return incre.config.base + root + sliceDir + img;
     });
@@ -344,6 +346,7 @@ var GaGa = (function(){
             if(img.indexOf('slice') != -1){
               var imgKey = prefix + img;
               var imgV = coordinates.sprite[imgKey];
+              var csspos = '';//background-position
               var bgs = 'inherit';//background-size
               var pos = {
                 x : imgV.x,
@@ -354,17 +357,30 @@ var GaGa = (function(){
               if(incre.config.gaga.src[css].oneset){
                 pos.x = imgV.x / 2;
                 pos.y = imgV.y / 2;
-                bgs = [coordinates.spriteSize.width / 2, 'px',' ', coordinates.spriteSize.height / 2, 'px'].join('');
+                if(rem){
+                  bgs = [coordinates.spriteSize.width / 2 / rem, 'rem',' ', coordinates.spriteSize.height / 2 / rem, 'rem'].join('');
+                }
+                else{
+                  bgs = [coordinates.spriteSize.width / 2, 'px',' ', coordinates.spriteSize.height / 2, 'px'].join('');
+                }
               }
 
-              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:-', pos.x, 'px -', pos.y, 'px;', 'background-size: ', bgs , ';'].join('');
+              if(rem){
+                csspos = ['-', pos.x / rem, 'rem -', pos.y / rem, 'rem;'].join('');
+              }
+              else{
+                csspos = ['-', pos.x, 'px -', pos.y, 'px;'].join('');
+              }
+
+              return ['background-image:url(sprite/', css.replace('css', 'png') , ');background-position:', csspos, 'background-size: ', bgs, ';'].join('');
             }
             return match;
           });
           cb(null, distCodes);
         },
         function retinaCode(code, cb){
-          if(incre.config.retina_image){
+          // 非oneset模式，才生成retina code
+          if(!incre.config.gaga.src[css].oneset){
             var minicodes = new cleancss({
               noAdvanced : true,
               compatibility : true
@@ -395,8 +411,25 @@ var GaGa = (function(){
               var img = coordinates.sprite2x[tmpkey];
 
               if(img){
+                var csspos = '';//background-position
+                var bgs = '';//background-size
+
+                if(rem){
+                  csspos = ['-', img.x / 2 / rem, 'rem -', img.y / 2 / rem, 'rem;'].join('');
+                }
+                else{
+                  csspos = ['-', img.x / 2, 'px -', img.y / 2, 'px;'].join('');
+                }
+
+                if(rem){
+                  bgs = [rw / rem, 'rem ', rh / rem, 'rem;'].join('');
+                }
+                else{
+                  bgs = [rw, 'px ', rh, 'px;'].join('');
+                }
+
                 retinaCode += selector;
-                retinaCode += ['{background-image:url(sprite/', css.replace('.css', '@2x.png'), ');background-position:-', img.x/2, 'px -', img.y/2, 'px;background-size:', rw, 'px ', rh, 'px;}'].join('');
+                retinaCode += ['{background-image:url(sprite/', css.replace('.css', '@2x.png'), ');background-position:', csspos, 'background-size:', bgs, '}'].join('');
               }
             });
 
@@ -598,14 +631,30 @@ var GaGa = (function(){
     action();
   }
 
+  // 替换图片名中的@2x为-2x
+  function replace2x(code, file){
+    var tmpcode = code;
+    tmpcode = tmpcode.replace(/@2x\.png/g, '-2x.png');//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
+    if(tmpcode.indexOf('-2x.png') != -1){
+      console.log(('  Warning : file ' + file + ' has retina images! Turn their names to "*-2x.png"!').yellow);
+    }
+
+    return tmpcode;
+  }
+
   return {
     build : build,
-    cssprite : cssprite
+    cssprite : cssprite,
+    replace2x : replace2x
   }
 }());
 
 exports.cssprite = function(file, imgcss, success, fail, cfg){
   GaGa.cssprite(file, imgcss, success, fail, cfg);
+}
+
+exports.replace2x = function(code, file){
+  GaGa.replace2x(code, file);
 }
 
 exports.init = function(_incre){
