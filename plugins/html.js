@@ -17,7 +17,7 @@ var Html = (function(){
   // <div>{$out.title}</div><!--后端变量，后端模板解析时解析-->
   // 
   
-  var root, dist, charset;
+  var root, dist, charset, verflag;
 
   function isenable(){
     return !!incre.config.html;
@@ -112,9 +112,16 @@ var Html = (function(){
     root = root || incre.config.base + (incre.config.html.root || '');
     dist = root + '/dist/';
     charset = charset || incre.config.html.charset || 'utf-8';
+    verflag = verflag || incre.config.html.verflag;
     if(incre.config.html.root){
       delete incre.config.html.root;
       delete incre.config.html.charset;
+      delete incre.config.html.verflag;
+    }
+
+    // 新版UI开发系统，将原始文件移植到src目录中
+    if(verflag == 1){
+      dist = root;
     }
 
     var keys = incre.gear._.keys(incre.config.html);
@@ -127,6 +134,10 @@ var Html = (function(){
       else{
         var htmlPath = root + key;
         var fragVars = incre.config.html[key];//页面片模板变量
+
+        if(verflag == 1){
+          htmlPath = root + 'src/' + key;
+        }
 
         action(htmlPath,fragVars).done(function(res){
           if(res){
@@ -168,8 +179,13 @@ exports.init = function(_incre){
       var opt = process.argv[3];
 
       if(opt && opt == '-w'){
+        var tmproot = incre.config.html.root;
         var watch = chokidar.watch(incre.config.base + incre.config.html.root, {ignored: /dist/, persistent: true});
         watch.on('change', function(file){
+          var tmp = file.replace(tmproot, '');
+          if(tmp.indexOf('/') == -1){//监控目录的根目录下的文件改动
+            return;
+          }
           console.log(('  Info : auto build html as \'' + file + '\' has been changed') .grey);
           Html.build();
         });

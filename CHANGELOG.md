@@ -1,5 +1,8 @@
 change log
 ============
+5 Sept. 2015
+ * `incre html`支持指定源文件存放目录，比如放在html/src中，方便按相对目录查找其他资源
+
 2 Sept. 2015
  * background-image 支持rem
  * 废除retina_image配置
