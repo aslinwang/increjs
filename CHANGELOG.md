@@ -1,5 +1,8 @@
 change log
 ============
+8 Sept. 2015
+ * gaga时，修复在替换雪碧图版本号时bug
+
 5 Sept. 2015
  * `incre html`支持指定源文件存放目录，比如放在html/src中，方便按相对目录查找其他资源
 

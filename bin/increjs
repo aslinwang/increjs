@@ -489,7 +489,7 @@ var build = (function(){
 
             //如果是样式文件，在minify之后，再处理sprite图片
             if(newfile.indexOf('.css') != -1){
-              cfg.newcode = incre.gaga.replace2x(newcode, newfile);
+              newcode = incre.gaga.replace2x(newcode, newfile);
               if(incre.gaga){
                 incre.gaga.cssprite(k, imgcss, function(verObj){
                   incre.gear._.each(verObj, function(v1, k1){//cssgaga 不能再设置sprite新文件名

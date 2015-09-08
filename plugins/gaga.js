@@ -654,7 +654,7 @@ exports.cssprite = function(file, imgcss, success, fail, cfg){
 }
 
 exports.replace2x = function(code, file){
-  GaGa.replace2x(code, file);
+  return GaGa.replace2x(code, file);
 }
 
 exports.init = function(_incre){
