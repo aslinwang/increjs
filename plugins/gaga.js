@@ -257,6 +257,7 @@ var GaGa = (function(){
     var retinaSize;
 
     var rem = incre.config.gaga.src[css].rem;
+    var has2x;
 
     imgList = incre.gear._.map(imgList, function(img){
       return incre.config.base + root + sliceDir + img;
@@ -303,6 +304,7 @@ var GaGa = (function(){
         },
         function createSprite2x(list, cb){// create retina sprite
           if(list.length > 0){
+            has2x = true;
             Spritesmith.build(incre.gear._.extend(config, {
               src : list
             }), function(err, result){
@@ -336,6 +338,7 @@ var GaGa = (function(){
             });
           }
           else{
+            has2x = false;
             cb(null);
           }
         },
@@ -380,7 +383,7 @@ var GaGa = (function(){
         },
         function retinaCode(code, cb){
           // 非oneset模式，才生成retina code
-          if(!incre.config.gaga.src[css].oneset){
+          if(!incre.config.gaga.src[css].oneset && has2x){
             var minicodes = new cleancss({
               noAdvanced : true,
               compatibility : true

@@ -183,6 +183,7 @@ exports.init = function(_incre){
         var watch = chokidar.watch(incre.config.base + incre.config.html.root, {ignored: /dist/, persistent: true});
         watch.on('change', function(file){
           var tmp = file.replace(tmproot, '');
+          tmp = tmp.replace(/\\/g, '/');
           if(tmp.indexOf('/') == -1){//监控目录的根目录下的文件改动
             return;
           }
