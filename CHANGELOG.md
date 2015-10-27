@@ -1,5 +1,9 @@
 change log
 ============
+27 Oct.2015
+ * 优化increfile配置
+ * `incre html -w`监听目录改动时循环触发的bug
+
 10 Oct.2015
  * 修复不需要二倍图时gaga报错的情况
  * 监控html改动时，监控出错修复

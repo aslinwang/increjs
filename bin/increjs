@@ -348,7 +348,8 @@ var build = (function(){
     });
 
     if([CONST_VERS.NOINCRE, CONST_VERS.NOVER, CONST_VERS.NOMIN].indexOf(v.trim()) == -1){//全量版本号存在时， ""和"-"的含义请查看sample/increfile.js
-      //计算增量文件
+      // @todo可能没法用了
+      // 计算增量文件
       var cdnfile = incre.config.upload.cdnpath + k.replace('.js', '_' + v + '.js');
       var jsKey = k.replace('.js', '');
       var logObj = {};
@@ -543,8 +544,8 @@ function upload(opt){
   else{
     console.log('  Info : start uploading'.green);
     incre.uploader.uploadDir(uploadDir, opt.split(','), incre.gear._.extend(incre.config, {
-      cdnpath : incre.config.upload.cdnpath,
-      cdncsspath : incre.config.upload.cdncsspath,
+      // cdnpath : incre.config.upload.cdnpath,
+      // cdncsspath : incre.config.upload.cdncsspath,
       pathmap : incre.config.pathmap,
       filePathMap : getFilePathMap()
     }), function(){

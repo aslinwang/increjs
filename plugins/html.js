@@ -181,7 +181,9 @@ exports.init = function(_incre){
       if(opt && opt == '-w'){
         var tmproot = incre.config.html.root;
         var watch = chokidar.watch(incre.config.base + incre.config.html.root, {ignored: /dist/, persistent: true});
+        // 统一不同OS中文件URI路径隔离符号
         watch.on('change', function(file){
+          file = file.replace(/\\/g, '/');
           var tmp = file.replace(tmproot, '');
           tmp = tmp.replace(/\\/g, '/');
           if(tmp.indexOf('/') == -1){//监控目录的根目录下的文件改动

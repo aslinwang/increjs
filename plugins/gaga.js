@@ -609,8 +609,8 @@ var GaGa = (function(){
             });
 
             incre.uploader.uploadDir(uploadDir, v1, incre.gear._.extend(incre.config, {
-              cdnpath : incre.config.upload.cdnpath,
-              cdncsspath : incre.config.upload.cdncsspath,
+              // cdnpath : incre.config.upload.cdnpath,
+              // cdncsspath : incre.config.upload.cdncsspath,
               pathmap : incre.config.pathmap,
               filePathMap : incre.gear._.extend(filePathMap, cfg.fpMap),
               cdn : incre.config.upload.cdncssimgpath
