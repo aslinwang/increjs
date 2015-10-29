@@ -356,8 +356,8 @@ var GaGa = (function(){
                 y : imgV.y
               };
 
-              // 只使用一套雪碧图，对低分辨率的设备也使用二倍图
-              if(incre.config.gaga.src[css].oneset){
+              // oneset/is2in1含义是：是否将多套图统一为一套图
+              if(incre.config.gaga.src[css].oneset || incre.config.gaga.src[css].is2in1){
                 pos.x = imgV.x / 2;
                 pos.y = imgV.y / 2;
                 if(rem){
@@ -383,7 +383,7 @@ var GaGa = (function(){
         },
         function retinaCode(code, cb){
           // 非oneset模式，才生成retina code
-          if(!incre.config.gaga.src[css].oneset && has2x){
+          if(!(incre.config.gaga.src[css].oneset || incre.config.gaga.src[css].is2in1) && has2x){
             var minicodes = new cleancss({
               noAdvanced : true,
               compatibility : true
@@ -574,7 +574,7 @@ var GaGa = (function(){
         var f = [];//图片文件列表
         incre.gear._.each(v, function(_ver, _f){
           // 处理非文件名的配置
-          if(['oneset', 'rem'].indexOf(_f) == -1){
+          if(['oneset', 'rem', 'is2in1'].indexOf(_f) == -1){
             f.push(_f);
             vers[path.basename(_f).replace(/@2x\.png/g, '-2x.png')] = _ver;//对于不支持上传文件名带有@符号文件的CMS，将@2x改为-2x
           }

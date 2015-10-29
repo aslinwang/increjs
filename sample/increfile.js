@@ -49,6 +49,7 @@ module.exports = {
     // },
     // 'root' : 'mobi/css/',//样式根目录
     // 'slice' : 'img/slice/',//切片图目录root+slice
+    // 'sprite' : '/css/sprite/',//雪碧图的上传目录:"~/{project}{sprite}"
     // 'src' : {
     //   'main.css' : {
     //     'main.png' : '150404',
@@ -56,7 +57,8 @@ module.exports = {
     //   },
     //   'style1.css' : {
     //     'rem' : 100,//rem方案
-    //     'oneset' : true,//使用一套雪碧图
+    //     // is2in1：是否将多套图统一为一套图，pc版本不需要设置此属性。此属性用于替换oneset
+    //     'is2in1' : true,
     //     'style1.png' : '150404'
     //   }
     // }
@@ -86,6 +88,7 @@ module.exports = {
     
     // 'root' : 'mobi/html/',//html根目录，存放html片段文件，生成文件在mobi/html/dist目录下
     // 'charset' : 'gbk',//html编码
+    // 'verflag' : 1,//新版UI开发系统，将原始文件移植到src目录中
     // 'mergetest.htm' : {//key为要构建的文件名，value为文件中需要的模板变量
     //   'inc/header.html' : {
     //     'title' : '腾讯汽车触屏版',

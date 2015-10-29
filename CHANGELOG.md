@@ -1,5 +1,8 @@
 change log
 ============
+29 Oct.2015
+ * 优化increfile的oneset配置
+
 27 Oct.2015
  * 优化increfile配置
  * `incre html -w`监听目录改动时循环触发的bug
