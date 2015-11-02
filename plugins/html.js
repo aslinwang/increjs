@@ -166,7 +166,8 @@ var Html = (function(){
   }
 
   return {
-    build : build
+    build : build,
+    verflag : verflag
   }
 }());
 
@@ -186,7 +187,7 @@ exports.init = function(_incre){
           file = file.replace(/\\/g, '/');
           var tmp = file.replace(tmproot, '');
           tmp = tmp.replace(/\\/g, '/');
-          if(tmp.indexOf('/') == -1){//监控目录的根目录下的文件改动
+          if(tmp.indexOf('/') == -1 && Html.verflag){//监控目录的根目录下的文件改动,新版UI开发系统中，忽略更目录的改动
             return;
           }
           console.log(('  Info : auto build html as \'' + file + '\' has been changed') .grey);

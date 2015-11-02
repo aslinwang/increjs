@@ -1,5 +1,8 @@
 change log
 ============
+1 Nov.2015
+ * 优化`incre html -w`监控目录的逻辑
+
 29 Oct.2015
  * 优化increfile的oneset配置
 
