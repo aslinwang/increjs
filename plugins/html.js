@@ -166,8 +166,7 @@ var Html = (function(){
   }
 
   return {
-    build : build,
-    verflag : verflag
+    build : build
   }
 }());
 
@@ -182,12 +181,13 @@ exports.init = function(_incre){
       if(opt && opt == '-w'){
         var tmproot = incre.config.html.root;
         var watch = chokidar.watch(incre.config.base + incre.config.html.root, {ignored: /dist/, persistent: true});
+        var verflag = incre.config.html.verflag;
         // 统一不同OS中文件URI路径隔离符号
         watch.on('change', function(file){
           file = file.replace(/\\/g, '/');
           var tmp = file.replace(tmproot, '');
           tmp = tmp.replace(/\\/g, '/');
-          if(tmp.indexOf('/') == -1 && Html.verflag){//监控目录的根目录下的文件改动,新版UI开发系统中，忽略更目录的改动
+          if(tmp.indexOf('/') == -1 && verflag){//监控目录的根目录下的文件改动,新版UI开发系统中，忽略更目录的改动
             return;
           }
           console.log(('  Info : auto build html as \'' + file + '\' has been changed') .grey);
