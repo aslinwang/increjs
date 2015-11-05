@@ -1,5 +1,8 @@
 change log
 ============
+5 Nov.2015
+ * 如果css中没有使用gaga功能，样式gaga过程不能连续
+
 1 Nov.2015
  * 优化`incre html -w`监控目录的逻辑
 
