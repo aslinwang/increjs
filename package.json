@@ -1,6 +1,6 @@
 ﻿{
   "name": "increjs",
-  "version": "2.2.25",
+  "version": "2.3.0",
   "description": "前端开发中的自动化工具",
   "author": {
     "name": "aslinwang",
@@ -19,6 +19,7 @@
     "iconv-lite": "~0.4.4",
     "async": "~0.2.6",
     "layout": "~2.0.0",
+    "concat-stream": "~1.5.1",
     "express": "3.4.0",
     "requirejs": "*"
   },
@@ -27,7 +28,7 @@
     "blanket": "*"
   },
   "optionalDependencies" : {
-    "gmsmith": "~0.4.1",
+    "gmsmith": "*",
     "gm" : "~1.4.2"
   },
   "scripts": {},

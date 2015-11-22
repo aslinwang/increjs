@@ -14,6 +14,7 @@
 var async = require('async');
 var fs = require('fs');
 var Layout = require('layout');
+var concat = require('concat-stream');
 var path = require('path');
 var cleancss = require('clean-css');
 var incre;
@@ -21,7 +22,7 @@ var incre;
 // spritesmith
 // https://github.com/Ensighten/spritesmith
 var Spritesmith = (function(){
-  var engine,gm;
+  var engine,gm,GmSmith;
 
   function EngineSmith($engine){
     this.engine = $engine;
@@ -50,37 +51,6 @@ var Spritesmith = (function(){
     }
   };
 
-  function CanvasSmith($canvas){
-    this.canvas = $canvas;
-  }
-  CanvasSmith.prototype = {
-    addImage : function(imgObj){
-      var img = imgObj.meta.img,
-          x = imgObj.x,
-          y = imgObj.y,
-          $canvas = this.canvas;
-      $canvas.addImage(img, x, y);
-    },
-    addImages : function(images){
-      var _this = this;
-      images.forEach(function(img){
-        _this.addImage(img);
-      });
-    },
-    addImageMap : function(imageMap){
-      var _this = this,
-          imageNames = Object.getOwnPropertyNames(imageMap);
-
-      imageNames.forEach(function(name){// Add the images
-        var image = imageMap[name];
-        _this.addImage(image);
-      });
-    },
-    export : function(options, cb){
-      this.canvas['export'](options, cb);
-    }
-  };
-
   /**
    * Spritesmith generation function
    * @param {Object} params Parameters for spritesmith
@@ -101,18 +71,15 @@ var Spritesmith = (function(){
         algorithmPref = params.algorithm || 'top-down';
 
     try{
-      engine = require('gmsmith');
+      GmSmith = require('gmsmith');
       gm = require('gm').subClass({imageMagick : params.imageMagick});
     }catch(e){
       console.log('  Error : has no gmsmith engine! Please install GraphicsMagick lib and reinstall increjs! https://github.com/aslinwang/increjs/issues/3'.red);
       return;
     }
 
-    // If there is a set parameter for the engine, use it
-    if(engine.set){
-      var engineOpts = params.engineOpts || {};
-      engine.set(engineOpts);
-    }
+    var engineOpts = params.engineOpts || {};
+    engine = new GmSmith(engineOpts);
 
     // Create our smiths
     var engineSmith = new EngineSmith(engine),
@@ -163,7 +130,6 @@ var Spritesmith = (function(){
       function generateCanvas(cb){
         var width = Math.max(packedObj.width || 0, 0),
             height = Math.max(packedObj.height || 0, 0);
-
         var itemsExist = packedObj.items.length;
         if(itemsExist){
           width -= padding;
@@ -176,7 +142,11 @@ var Spritesmith = (function(){
         };
 
         if(itemsExist){
-          engine.createCanvas(width, height, cb);
+          var canvas = engine.createCanvas(width, height);
+          // cb(null, canvas);
+          process.nextTick(function handleNextTick () {
+            cb(null, canvas);
+          });
         }
         else{
           cb(null, '');
@@ -185,17 +155,28 @@ var Spritesmith = (function(){
       function exportCanvas(canvas, cb){
         var items = packedObj.items;
         if(!canvas){
-          return cb(null, '');
+          return cb(null, new Buffer(0));
         }
 
-        var canvasSmith = new CanvasSmith(canvas);
+        // Add the images onto canvas
+        try {
+          items.forEach(function addImage (item) {
+            var img = item.meta.img;
+            canvas.addImage(img, item.x, item.y);
+          });
+        } catch (err) {
+          return cb(err);
+        }
 
-        canvasSmith.addImages(items);
-
-        canvasSmith['export'](exportOpts, cb);
+        // Export our canvas
+        var imageStream = canvas['export'](exportOpts);
+        imageStream.on('error', cb);
+        imageStream.pipe(concat(function handleResult (image) {
+          cb(null, image);
+        }));
       },
-      function saveImageToRetObj(imgStr, cb){
-        retObj.image = imgStr;
+      function saveImage(image, cb){
+        retObj.image = image;
 
         cb(null);
       },
@@ -296,7 +277,7 @@ var GaGa = (function(){
         function verify2x(cb){// verify @2x.png is exist
           var tmpList = [];
           incre.gear._.each(imgList2x, function(v, k){
-            if(path.existsSync(v)){
+            if(fs.existsSync(v)){
               tmpList.push(v);
             }
           });

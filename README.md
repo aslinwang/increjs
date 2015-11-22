@@ -5,7 +5,7 @@ increjs
 
 Install
 -------
-* 安装nodejs，目前暂支持v0.10.26版本
+* 安装nodejs
 * 安装图形处理库GraphicsMagick(如果需要用到`incre gaga`)
   * Windows版本
     [下载安装](https://github.com/aslinwang/increjs/tree/master/misc)

@@ -1,5 +1,8 @@
 change log
 ============
+22 Nov.2015
+ * 升级increjs，支持node-v4.2.2
+
 5 Nov.2015
  * 如果css中没有使用gaga功能，样式gaga过程不能连续
 
