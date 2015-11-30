@@ -322,7 +322,9 @@ var build = (function(){
   // 将import文件替换为实际代码
   function importcss(data){
     data = data.replace(/@import\s+url\(['"]?([\d\w_\\-\\.\/]*).*\);/g, function(match, group, str){
-      return fs.readFileSync(incre.config.gaga.root + group);
+      var code = fs.readFileSync(incre.config.gaga.root + group);
+      code = incre.removeBom(code);// remove bom,文件头含有bom，会使样式失效
+      return code;
     });
     return data;
   }

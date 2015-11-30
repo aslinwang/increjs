@@ -1,5 +1,9 @@
 change log
 ============
+30 Nov.2015
+ * importCss时，自动去除BOM
+ * 模版编译之后，去除回车之后的大段空格
+
 22 Nov.2015
  * 升级increjs，支持node-v4.2.2
 

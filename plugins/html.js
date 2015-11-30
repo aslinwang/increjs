@@ -23,22 +23,6 @@ var Html = (function(){
     return !!incre.config.html;
   }
 
-  function removeBom(data, fun){
-    var res = data;
-    var buff = new Buffer(data, 'utf-8');
-    if (buff[0].toString(16).toLowerCase() == "ef" && buff[1].toString(16).toLowerCase() == "bb" && buff[2].toString(16).toLowerCase() == "bf") {
-      //EF BB BF 239 187 191
-
-      buff = buff.slice(3);
-      res = buff.toString('utf-8');
-
-      if(fun){
-        fun();
-      }
-    }
-    return res;
-  }
-
   //用vars填充code中的变量
   function fillVars(code, vars){
     if(!vars){
@@ -71,7 +55,7 @@ var Html = (function(){
         //替换模板变量
         datas[i] = fillVars(datas[i], fragVars[frags[i]]);
 
-        codes[frags[i]] = removeBom(datas[i], function(){
+        codes[frags[i]] = incre.removeBom(datas[i], function(){
           console.log(('  Warning : \'' + frags[i] + '\' has bom and be removed automatically!').yellow);          
         });
       }
@@ -142,7 +126,7 @@ var Html = (function(){
         action(htmlPath,fragVars).done(function(res){
           if(res){
             var file = dist + key;
-            res = removeBom(res);//remove bom
+            res = incre.removeBom(res);//remove bom
             if(charset != 'utf-8'){
               //res = iconv.decode(res, 'utf-8');
               res = iconv.encode(res, charset);
